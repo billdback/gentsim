@@ -23,7 +23,7 @@ class EntityDescription extends Description {
    * @param attrs Optional set of attributes.
    * @throws IllegalArgumentException Thrown if the type is invalid.
    */
-  EntityDescription (type, Map attrs = null) throws IllegalArgumentException {
+  EntityDescription (String type, Map attrs = null) throws IllegalArgumentException {
     super(type, attrs)
   }
 
@@ -33,7 +33,7 @@ class EntityDescription extends Description {
    * @param name The name of the method.
    * @param c The body of the method.  
    */
-  def method (name, Closure c) {
+  def method (String name, Closure c) {
     this.methods[name] = c
   }
 
@@ -42,7 +42,7 @@ class EntityDescription extends Description {
    * @param type The type of the event to handle.
    * @param closure The closure to be called.  This must accept an event.
    */
-  def handleEvent(type, Closure c) {
+  def handleEvent(String type, Closure c) {
     this.handleEvent(type, (Condition)null, c)
   }
 
@@ -52,7 +52,7 @@ class EntityDescription extends Description {
    * @param conditions A map of conditions that must all be satisfied.
    * @param closure The closure to be called.  This must accept an event.
    */
-  def handleEvent(type, Map conditions, Closure c) {
+  def handleEvent(String type, Map conditions, Closure c) {
     def cond = new Condition().matchAll(conditions)
     //c.delegate = delegate // sets the delegate on the closure to be the same as this delegate.
     //c.setResolveStrategy(Closure.DELEGATE_ONLY)
@@ -65,7 +65,7 @@ class EntityDescription extends Description {
    * @param conditions The condition to match on the event to be called.
    * @param closure The closure to be called.  This must accept an event.
    */
-  def handleEvent(type, Condition condition, Closure c) {
+  def handleEvent(String type, Condition condition, Closure c) {
     if (this.eventHandlers[type] == null) this.eventHandlers[type] = []
     this.eventHandlers[type] << [condition, c] // add another condition
   }

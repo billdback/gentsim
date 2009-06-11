@@ -89,7 +89,7 @@ class SimulationContainer {
                                              file.name)
     }
     else if (file.exists()) { // directory of files - load each (note, can recurse if child is dir.)
-      for (def f in file.list()) {
+      for (File f in file.list()) {
         loadDescriptionsFrom(scriptName + File.separator + f)
       }
     }
@@ -181,6 +181,13 @@ class SimulationContainer {
     entityDescriptions[ed.type] = ed
     statistics.number_entity_descriptions += 1
     ed
+  }
+
+  /**
+   * Returns all of the existing entity descriptions.
+   */
+  def List getEntityDescriptions () {
+    this.entityDescriptions
   }
 
   /**

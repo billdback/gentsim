@@ -11,7 +11,7 @@ class EventDescription extends Description {
    * @param attrs Optional attributes.
    * @throws IllegalArgumentException Thrown if the type is invalid.
    */
-  EventDescription (type, Map attrs = null) throws IllegalArgumentException {
+  EventDescription (String type, Map attrs = null) throws IllegalArgumentException {
     super(type, attrs)
   }
 

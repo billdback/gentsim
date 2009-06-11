@@ -11,7 +11,7 @@ class ServiceDescription extends EntityDescription {
    * @param attrs A map of attribute values.
    * @throws IllegalArgumentException Thrown if the type is invalid.
    */
-  ServiceDescription (type, Map attrs = null) throws IllegalArgumentException {
+  ServiceDescription (String type, Map attrs = null) throws IllegalArgumentException {
     super(type, attrs)
   }
 

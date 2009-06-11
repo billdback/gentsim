@@ -5,17 +5,17 @@ package org.gentsim.framework
  */
 class Description {
 
-  final type
-  final attributes                = [:]   // name : value
-  final parameters                = [:]   // name : value
+  final String type
+  final attributes   = [:]   // name : value
+  final parameters   = [:]   // name : value
   
   /**
    * Creates a new description that can be instantiated in the simulation.
-   * @param type The unique type of the base.
+   * @param type The unique type of the thing.
    * @param attrs Optional map of attributes.
    * @throws IllegalArgumentException Thrown if the type is invalid.
    */
-  Description (type, Map attrs = null) throws IllegalArgumentException {
+  Description (String type, Map attrs = null) throws IllegalArgumentException {
     if (type == null || type == "") {
       throw new IllegalArgumentException("All descriptions must have a non-blank type.")
     }
@@ -30,7 +30,7 @@ class Description {
    *   default value for all new instances of this type.  This can be a closure that
    *   will be called when setting the value.
    */
-  def attribute (name, value = null) {
+  def attribute (String name, value = null) {
     attributes[name] = value
     this
   }
@@ -57,7 +57,7 @@ class Description {
    * @param value The value of the parameter.  This will be the same value for all
    *   instances of the base.
    */
-  def parameter (name, value) {
+  def parameter (String name, value) {
     parameters[name] = value
     this
   }
