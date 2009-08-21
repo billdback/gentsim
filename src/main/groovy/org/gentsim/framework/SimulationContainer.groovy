@@ -1,11 +1,34 @@
+/*
+Copyright © 2009 William D. Back
+This file is part of gentsim.
+
+    gentsim is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    gentsim is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.gentsim.framework
 
+import org.gentsim.util.Trace
+
 import org.perf4j.*
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 /**
  * A simulation container owns all of the simulation entities.
  */
 class SimulationContainer {
+
+  private static Log log = LogFactory.getLog("org.gentsim.log")
 
   /** Map of statistics about the simulation execution. */
   public statistics = ["number_entity_descriptions" : 0,
@@ -19,7 +42,7 @@ class SimulationContainer {
                       ]
 
   /** Prints the statistics for the simulation. */
-  def printStatistics() { statistics.each { Log.info "${it.key}: ${it.value}" } }
+  def printStatistics() { statistics.each { Trace.trace("statistics", "${it.key}: ${it.value}") } }
 
   /** Keeps track of the next ID for this container. */
   protected nextID = 1
@@ -44,6 +67,7 @@ class SimulationContainer {
    * This creates a new simulation container.  
    */
   SimulationContainer () {
+    Trace.on("system") // start with on by default.
   }
 
   /**
@@ -51,6 +75,7 @@ class SimulationContainer {
    * @param scriptName A file that contains entity descriptions to load.
    */
   SimulationContainer (String scriptName) {
+    Trace.on("system") // start with on by default.
     this.loadDescriptionsFrom(scriptName)
   }
 
@@ -59,6 +84,7 @@ class SimulationContainer {
    * @param scripts List of scripts to load from.
    */
   SimulationContainer (List scripts) {
+    Trace.on("system") // start with on by default.
     this.loadDescriptionsFrom (scripts)
   }
 
@@ -78,7 +104,7 @@ class SimulationContainer {
    * @throws FileNotFoundException if the file doesn't exist.
    */
   def loadDescriptionsFrom (String scriptName) {
-    Log.info "Attempting to load descriptions from ${scriptName}"
+    Trace.trace("system", "Attempting to load descriptions from ${scriptName}")
 
     File file = new File(scriptName)
     def ris = getClass().getResourceAsStream(scriptName)
@@ -147,29 +173,32 @@ class SimulationContainer {
    */
   private loadDescriptionUsingGroovyScriptEngine(GroovyScriptEngine gse, String scriptName) {
     try {
-      Log.info "Running script ${scriptName}"
+      Trace.trace("system", "Running script ${scriptName}")
       Binding b = new Binding()
       gse.run(scriptName, b)
       // search the binding for any entity descriptions that got created.
-      for (def var in b.variables) {
+      for (var in b.variables) {
         def desc = var.getValue()
         if (desc instanceof ServiceDescription) {
           this.addServiceDescription(desc)
-          Log.info "Adding service description ${desc.type}"
+          Trace.trace("system", "Adding service description ${desc.type}")
+          Trace.trace("services", "Adding service description ${desc.type}")
         }
         else if (desc instanceof EntityDescription) {
-          Log.info "Adding entity description ${desc.type}"
+          Trace.trace("system", "Adding entity description ${desc.type}")
+          Trace.trace("entities", "Adding entity description ${desc.type}")
           this.addEntityDescription(desc)
         }
         else if (desc instanceof EventDescription) {
-          Log.info "Adding event description ${desc.type}"
+          Trace.trace("system", "Adding event description ${desc.type}")
+          Trace.trace("events", "Adding event description ${desc.type}")
           this.addEventDescription(desc)
         }
       }
     }
     catch (InstantiationException ie) { /* ignore */ }
     catch (Exception e) {
-      Log.error (e, "Error loading script from ${scriptName}")
+      log.error (e, "Error loading script from ${scriptName}")
     }
   }
 
@@ -254,6 +283,7 @@ class SimulationContainer {
       }
     }
 
+    Trace.trace("entities", "Created entity of type ${entityType} with id ${entity.id} ${entity.attributes}")
     entity
   }
 
@@ -273,7 +303,7 @@ class SimulationContainer {
    */
   def getEntitiesOfType (type) {
     def ents = []
-    for (def ent in this.entitiesById.values()) {
+    for (ent in this.entitiesById.values()) {
       if (ent.type == type) {
         ents << ent
       }
@@ -310,6 +340,7 @@ class SimulationContainer {
     this.entitiesById.remove(entityId)
     statistics.number_entities_removed += 1
 
+    Trace.trace ("entities", "Removing entity of type ${entity.description.type} and id ${entity.id}")
     entity
   }
 

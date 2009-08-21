@@ -1,7 +1,25 @@
+/*
+Copyright © 2009 William D. Back
+This file is part of gentsim.
+
+    gentsim is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    gentsim is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.gentsim.framework
 
-import org.perf4j.*
+import org.gentsim.util.Trace
 
+import org.perf4j.*
 /**
  * The simulation class is the main driver for the simulation, combining the container with the 
  * execution.
@@ -79,7 +97,7 @@ class Simulation extends SimulationContainer {
    * Continues to run the simulation until told to stop.
    */
   def run() {
-    Log.info "starting the simulation"
+    Trace.trace("system", "starting the simulation")
     statistics.start_time = new Date().getTime()
     Thread.start {
       sendEventToEntities(newEvent("system.startup"))
@@ -94,7 +112,7 @@ class Simulation extends SimulationContainer {
    * @param nbrCycles The number of cycles to run before shutting down.
    */
   def run(int nbrCycles) {
-    Log.info "starting the simulation for ${nbrCycles} cycles"
+    Trace.trace("system", "starting the simulation for ${nbrCycles} cycles")
     statistics.start_time = new Date().getTime()
     Thread.start {
       sendEventToEntities(newEvent("system.startup"))
@@ -141,6 +159,7 @@ class Simulation extends SimulationContainer {
    * @param event The event to send to interested entities.
    */
   protected sendEventToEntities (event) {
+    Trace.trace("events", "Sending ${event.type} ${event.attributes} to entities at time ${event.time}")
     //StopWatch watch = new LoggingStopWatch("Simulation.sendEventToEntities")
     def old_attributes = [:]
     super.getEntitiesWhoHandleEvent (event).each { ent ->
@@ -157,6 +176,7 @@ class Simulation extends SimulationContainer {
       if (changed_attr != []) {
         def escevt = super.newEvent("entity-state-changed", 
           ["entity_type": ent.type, "entity": ent, "changed_attributes": changed_attr])
+        Trace.trace("entities", "${ent.type} changed attributes ${changed_attr}")
         sendEvent(escevt)
       }
     }
@@ -199,10 +219,10 @@ class Simulation extends SimulationContainer {
    * Stops the simulation. 
    */
   def stop() {
-    Log.info "stopping the simulation"
+    Trace.trace("system", "stopping the simulation")
     statistics.end_time = new Date().getTime()
     statistics.elapsed_time = statistics.end_time - statistics.start_time
-    printStatistics()
+    super.printStatistics()
     sendEventToEntities(newEvent("system.shutdown"))
     this.shouldStop = true
   }
