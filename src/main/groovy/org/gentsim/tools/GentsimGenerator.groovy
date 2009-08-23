@@ -77,6 +77,27 @@ class GentsimGenerator {
   }
 
   /**
+   * Copies a resource from the default location with the given name.
+   * @param resourceName
+   */
+  def copyResource(String resourceName) {
+    def ris = getClass().getResourceAsStream(resourceName)
+    if (ris != null) {
+      File res = new File("./" + resourceName) // use the same name, but current location.
+      Writer writer = res.newWriter()
+      int c = -1
+      while ((c = ris.read()) != -1) {
+        writer.write(c)
+      }
+      writer.flush()
+      writer.close()
+    }
+    else {
+      throw new FileNotFoundException ("Unable to find resource ${resourceName}")
+    }
+
+  }
+  /**
    * Writes the content to a groovy file of the given name.
    * @param name The name of the thing being written.  This is used for the filename.
    * @param content The content of the file.
@@ -121,6 +142,8 @@ ${vname}.run()
     this.createDirIfNeeded("entities")
     this.createDirIfNeeded("events")
     this.createDirIfNeeded("services")
+
+    this.copyResource("/log4j.xml")
   }
 
   /**
