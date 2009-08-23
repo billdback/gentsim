@@ -1,6 +1,6 @@
 See COPYING for the license for this software.
 
-Web Site:  http://www.gentsim.org
+Web Site and Documentation:  http://www.gentsim.org
 Contact Info:  billback@gentsim.org
 
 The Groovy Entity Simulation (gentsim) domain specific language (DSL) and framework is designed to take much of the boilerplate and infrastructure effort out of developing entity or agent based simulations and allow the simulation developer to focus on the entities and interactions within the framework. It can dramatically reduce the amount of code needed to create a simulation and the code for modeling the individual entities is readable and focused on what the entity does instead of the details of the simulation infrastructure.
