@@ -29,8 +29,21 @@ class Documentor extends SimulationContainer {
     File f = new File(loc + "/docs")
     if (!f.exists()) f.mkdir()
 
-    // TODO find this in the correct .jar location.
-    new AntBuilder().copy(file: "../resources/css/gentsim.css", tofile: "${f.getAbsolutePath()}/gentsim.css")
+    // TODO - I use this logic in a few spots, make it a util. 
+    def ris = getClass().getResourceAsStream("/css/gentsim.css")
+    if (ris != null) {
+      File res = new File(loc + "/docs/gentsim.css") // use the same name, but current location.
+      Writer writer = res.newWriter()
+      int c = -1
+      while ((c = ris.read()) != -1) {
+        writer.write(c)
+      }
+      writer.flush()
+      writer.close()
+    }
+    else {
+      throw new FileNotFoundException ("Unable to find resource gentsim.css")
+    }
   }
 
   /**
@@ -53,7 +66,7 @@ class Documentor extends SimulationContainer {
         link(rel:"stylesheet", type:"text/css", href:"gentsim.css")
       }
       body {
-        h1("Descriptions for ${loc}")
+        h1("Simulation Descriptions for ${new File(loc).getAbsolutePath()}")
 
         if (eventDescriptions.size() > 0) {
           h2("Events")

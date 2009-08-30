@@ -38,6 +38,16 @@ class TestSimulationContainer {
       e.type == "entity1"
   }
 
+  def "Test getting all entity descriptions" () {
+    setup:
+      SimulationContainer sc = new SimulationContainer()
+      sc.addEntityDescription (new EntityDescription("entity1"))
+      sc.addEntityDescription (new EntityDescription("entity2"))
+
+    expect:
+      sc.entityDescriptions.size() == 2
+  }
+  
   def "Test for containing a certain entity description" () {
     setup:
       SimulationContainer sc = new SimulationContainer()
@@ -309,6 +319,17 @@ class TestSimulationContainer {
       ent2_1.services["service2"] == svc2
       ent2_2.services["service2"] == svc2
   }
+
+  def "Test getting all service descriptions" () {
+    setup:
+      SimulationContainer sc = new SimulationContainer()
+      sc.addServiceDescription (new ServiceDescription("svc1"))
+      sc.addServiceDescription (new ServiceDescription("svc2"))
+
+    expect:
+      sc.serviceDescriptions.size() == 2
+  }
+
 
   def "Test creation of events"() {
     setup:

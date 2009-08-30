@@ -18,8 +18,8 @@ This file is part of gentsim.
 /* 
  * This script provides commandline utility for creating gentsim 
  * projects and things.
- * Usage: gentsim <thing-type> <names> [<thing-type> <names> ...]
- *   thing-type is one of [simulation | entity | event | service]
+ * Usage: gentsim { document | <thing-type> <names> [<thing-type> <names> ...] }
+ *   thing-type is one of [simulation | entity | event | service ]
  *   names is a list of names of the given type to create.
  * NOTE:  gentsim.jar should be in the classpath.
  */
@@ -28,37 +28,37 @@ import org.gentsim.tools.*
 class gentsim {
 
   static showUsage() {
-    println "Usage: gentsim <thing-type> <names> [<thing-type> <names> ...]"
-    println "\tthing-type is one of [simulation | entity | event | service]"
+    println "Usage: gentsim { document | <thing-type> <names> [<thing-type> <names> ...] }"
+    println "\tthing-type is one of [simulation | entity | event | service ]"
     println "\tnames is a list of names of the given type to create."
   }
 
   static main (String [] args) {
 
-    if (args.length < 2) { // minimum number of args to be useful.
-      showUsage()
-    }
-    else {
-      def gg = new GentsimGenerator()
+    def docu = new Documentor()
+    def gg = new GentsimGenerator()
 
-      String type = null
-      static final types = ["simulation", "entity", "event", "service"]
+    String type = null
+    static final types = ["simulation", "entity", "event", "service"]
 
-      for (arg in args) {
-        if (arg in types) type = arg
-        else try {
-          switch (type) {
-            case "simulation": gg.generateSimulation(arg); break
-            case "entity"    : gg.generateEntity(arg);     break
-            case "event"     : gg.generateEvent(arg);      break
-            case "service"   : gg.generateService(arg);    break
-            default:  showUsage(); break;
-          }
+    for (arg in args) {
+      if (arg == "document") {
+        docu.loadDescriptionsFrom(".")
+        docu.generateHTML(".")
+      }
+      else if (arg in types) type = arg
+      else try {
+        switch (type) {
+          case "simulation": gg.generateSimulation(arg); break
+          case "entity"    : gg.generateEntity(arg);     break
+          case "event"     : gg.generateEvent(arg);      break
+          case "service"   : gg.generateService(arg);    break
+          default:  showUsage(); break;
         }
-        catch (IOException ioe) { // thrown for attempts to overwrite an existing file.
-          ioe.printStackTrace();
-          System.err.println ("ERROR:  attempting to overwrite file '${arg}'.  Rename or delete the old file.")
-        }
+      }
+      catch (IOException ioe) { // thrown for attempts to overwrite an existing file.
+        ioe.printStackTrace();
+        System.err.println ("ERROR:  attempting to overwrite file '${arg}'.  Rename or delete the old file.")
       }
     }
   }

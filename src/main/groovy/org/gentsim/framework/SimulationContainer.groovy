@@ -109,7 +109,7 @@ class SimulationContainer {
     File file = new File(scriptName)
     def ris = getClass().getResourceAsStream(scriptName)
 
-    if (file.exists() && !file.isDirectory()) { // single file, load it.
+    if (file.exists() && !file.isDirectory() && file.name.endsWith("groovy")) { // single file, load it.
       loadDescriptionUsingGroovyScriptEngine(new GroovyScriptEngine(
                                                    file.absolutePath, new GroovyClassLoader()), 
                                              file.name)
@@ -215,7 +215,7 @@ class SimulationContainer {
   /**
    * Returns all of the existing entity descriptions.
    */
-  def List getEntityDescriptions () {
+  def Map getEntityDescriptions () {
     this.entityDescriptions
   }
 
@@ -381,6 +381,14 @@ class SimulationContainer {
     if (!svc) svc = newService(type)
     svc
   }
+
+  /**
+   * Returns all of the existing service descriptions.
+   */
+  def Map getServiceDescriptions () {
+    this.serviceDescriptions
+  }
+
 
   /**
    * Creates a service and stores in the list of services.  
