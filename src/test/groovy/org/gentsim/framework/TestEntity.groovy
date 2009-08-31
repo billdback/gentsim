@@ -35,6 +35,18 @@ class TestEntity {
       ed.type == "type"
   }
 
+  def "Test calling init on entities"() {
+    setup:
+      def ed = new EntityDescription("initMe")
+      ed.initCalled = false
+      ed.method ("init") { initCalled = true }
+      def e = new Entity(ed, 1)
+
+    when:
+      e.init()
+    then:
+      true == e.initCalled
+  }
   def "Test entity handle all events of type"() {
     setup:
       def ed = new EntityDescription("type")

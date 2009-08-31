@@ -330,7 +330,6 @@ class TestSimulationContainer {
       sc.serviceDescriptions.size() == 2
   }
 
-
   def "Test creation of events"() {
     setup:
       SimulationContainer sc = new SimulationContainer()

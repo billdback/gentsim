@@ -42,14 +42,14 @@ class TestSimulation {
       def entd = new EntityDescription("system-msg-handler")
       entd.startupCalled = false
       entd.shutdownCalled = false
-      entd.handleEvent ("system.startup") { startupCalled = true }
-      entd.handleEvent ("system.shutdown") { shutdownCalled = true }
+      entd.handleEvent ("system.status.startup") { startupCalled = true }
+      entd.handleEvent ("system.status.shutdown") { shutdownCalled = true }
       s.addEntityDescription(entd)
       def ent = s.newEntity("system-msg-handler")
 
     when:
       s.run()
-      sleep(10)
+      sleep(2)
       s.stop()
 
     then:
@@ -63,8 +63,8 @@ class TestSimulation {
       def entd = new EntityDescription("system-msg-handler")
       entd.startupCalled = false
       entd.shutdownCalled = false
-      entd.handleEvent ("system.startup") { startupCalled = true }
-      entd.handleEvent ("system.shutdown") { shutdownCalled = true }
+      entd.handleEvent ("system.status.startup") { startupCalled = true }
+      entd.handleEvent ("system.status.shutdown") { shutdownCalled = true }
       s.addEntityDescription(entd)
       def ent = s.newEntity("system-msg-handler")
 
@@ -75,6 +75,21 @@ class TestSimulation {
       s.isStopped()
       ent.startupCalled
       ent.shutdownCalled
+  }
+
+  def "Test creating entities with init"() {
+    setup:
+
+      def ed1 = new EntityDescription("entity1")
+      ed1.initCalled = false
+      ed1.method ("init") { initCalled = true }
+      s.addEntityDescription(ed1)
+
+    when:
+      def e1 = s.newEntity("entity1")
+      s.cycle()
+    then:
+      e1.initCalled == true
   }
 
   def "Test creating and destroying enities" () {

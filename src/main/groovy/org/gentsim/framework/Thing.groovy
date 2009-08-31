@@ -167,6 +167,6 @@ class Thing {
     }
     return null
   }
-
+  
 }
 

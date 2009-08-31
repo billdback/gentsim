@@ -76,8 +76,10 @@ class Simulation extends SimulationContainer {
         "/framework/events/EntityCreatedEvent.groovy",
         "/framework/events/EntityDestroyedEvent.groovy",
         "/framework/events/EntityStateChangedEvent.groovy",
-        "/framework/events/SystemShutdown.groovy",
-        "/framework/events/SystemStartup.groovy",
+        "/framework/events/SystemShutdownCommand.groovy",
+        "/framework/events/SystemShutdownStatus.groovy",
+        "/framework/events/SystemStartupCommand.groovy",
+        "/framework/events/SystemStartupStatus.groovy",
         "/framework/events/TimeUpdateEvent.groovy"
       ]
     )
@@ -100,7 +102,7 @@ class Simulation extends SimulationContainer {
     Trace.trace("system", "starting the simulation")
     statistics.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(newEvent("system.startup"))
+      sendEventToEntities(newEvent("system.status.startup"))
       while (!this.shouldStop) {
         cycle()
       }
@@ -115,7 +117,7 @@ class Simulation extends SimulationContainer {
     Trace.trace("system", "starting the simulation for ${nbrCycles} cycles")
     statistics.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(newEvent("system.startup"))
+      sendEventToEntities(newEvent("system.status.startup"))
       for (int cnt = 0; cnt < nbrCycles && !this.shouldStop; cnt++) {
         cycle()
       }
@@ -223,7 +225,7 @@ class Simulation extends SimulationContainer {
     statistics.end_time = new Date().getTime()
     statistics.elapsed_time = statistics.end_time - statistics.start_time
     super.printStatistics()
-    sendEventToEntities(newEvent("system.shutdown"))
+    sendEventToEntities(newEvent("system.status.shutdown"))
     this.shouldStop = true
   }
 
