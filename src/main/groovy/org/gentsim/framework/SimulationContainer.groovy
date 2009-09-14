@@ -198,7 +198,8 @@ class SimulationContainer {
     }
     catch (InstantiationException ie) { /* ignore */ }
     catch (Exception e) {
-      log.error (e, "Error loading script from ${scriptName}")
+      e.printStackTrace()
+      log.error ("Error loading script from ${scriptName}")
     }
   }
 

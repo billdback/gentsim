@@ -32,6 +32,12 @@ class Simulation extends SimulationContainer {
   /** event queue for events. */
   protected final eventQueue = new TimeEventQueue()
 
+  /** Defines a minimum length (in milliseconds) for each cycle, mainly for user in the loop. */
+  protected int cycleLength = 0
+  
+  /** Indicates that the simulation is paused.  */
+  protected boolean paused = false
+
   /**
    * Creates a new time stepped simulation, loading descriptions from the given location.
    */
@@ -78,7 +84,8 @@ class Simulation extends SimulationContainer {
         "/framework/events/EntityStateChangedEvent.groovy",
         "/framework/events/SystemShutdownCommand.groovy",
         "/framework/events/SystemShutdownStatus.groovy",
-        "/framework/events/SystemStartupCommand.groovy",
+        "/framework/events/SystemStartCommand.groovy",
+        "/framework/events/SystemPauseCommand.groovy",
         "/framework/events/SystemStartupStatus.groovy",
         "/framework/events/TimeUpdateEvent.groovy"
       ]
@@ -104,7 +111,8 @@ class Simulation extends SimulationContainer {
     Thread.start {
       sendEventToEntities(newEvent("system.status.startup"))
       while (!this.shouldStop) {
-        cycle()
+        if (paused) Thread.sleep 100
+        else cycle()
       }
     }
   }
@@ -118,8 +126,13 @@ class Simulation extends SimulationContainer {
     statistics.start_time = new Date().getTime()
     Thread.start {
       sendEventToEntities(newEvent("system.status.startup"))
-      for (int cnt = 0; cnt < nbrCycles && !this.shouldStop; cnt++) {
-        cycle()
+      int cnt = 0
+      while (cnt < nbrCycles && !this.shouldStop) {
+        if (paused) Thread.sleep 100
+        else {
+          cycle()
+          cnt++
+        }
       }
       if (!this.shouldStop) stop() // perform any shutdown.
     }
@@ -130,8 +143,11 @@ class Simulation extends SimulationContainer {
    * other variants of the simulation may want to perform different activities.
    */
   def cycle () {
+    def start_time = System.currentTimeMillis()
     statistics.number_cycles += 1
     processCurrentEvents()
+    def stop_time = System.currentTimeMillis()
+    if ((stop_time - start_time) < cycleLength) Thread.sleep (cycleLength - (stop_time - start_time))
   }
 
   /**
@@ -141,6 +157,18 @@ class Simulation extends SimulationContainer {
    */
   def sendEvent (Event event) {
     this.eventQueue << event
+    // check for system commands that take place immediately.
+    switch (event.description.type) {
+      case "system.command.shutdown":
+        this.shouldStop = true
+        break
+      case "system.command.start":
+        this.paused = false
+        break
+      case "system.command.pause":
+        this.paused = true
+        break
+    }
     this
   }
 

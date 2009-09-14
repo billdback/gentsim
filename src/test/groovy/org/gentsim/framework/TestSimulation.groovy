@@ -37,6 +37,18 @@ class TestSimulation {
       s.getEventDescription("entity-state-changed")
   }
 
+  def "Test setting the cycle limit"() {
+    setup:
+
+    expect:
+      s.cycleLength == 0
+
+    when:
+      s.cycleLength = 2
+    then:
+      s.cycleLength == 2
+  }
+
   def "Test running the simulation"() {
     setup:
       def entd = new EntityDescription("system-msg-handler")

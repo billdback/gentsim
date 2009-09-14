@@ -17,4 +17,4 @@ This file is part of gentsim.
 */
 import org.gentsim.framework.EventDescription
 
-event = new EventDescription("system.command.startup")
+event = new EventDescription("system.command.start")

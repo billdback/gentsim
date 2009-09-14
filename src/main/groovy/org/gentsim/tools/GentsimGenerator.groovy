@@ -160,7 +160,7 @@ ${vname}.run()
 """import org.gentsim.framework.EntityDescription
 
 // create the entity.
-//${vname} = new EntityDescription("${name}")
+${vname} = new EntityDescription("${name}")
 
 // create attributes
 //${vname}.attrName = 0 // default value
