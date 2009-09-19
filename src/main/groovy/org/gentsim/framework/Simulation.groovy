@@ -160,7 +160,7 @@ class Simulation extends SimulationContainer {
     // check for system commands that take place immediately.
     switch (event.description.type) {
       case "system.command.shutdown":
-        this.shouldStop = true
+        stop()
         break
       case "system.command.start":
         this.paused = false
