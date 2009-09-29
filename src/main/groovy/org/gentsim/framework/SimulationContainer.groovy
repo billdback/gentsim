@@ -293,7 +293,7 @@ class SimulationContainer {
    * Stores entities for retrieval.
    * @param entity The entity to store.
    */
-  private def storeEntity (entity) {
+  protected def storeEntity (entity) {
     this.entitiesById[entity.id] = entity
   }
 

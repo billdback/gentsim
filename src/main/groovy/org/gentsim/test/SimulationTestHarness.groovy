@@ -27,7 +27,7 @@ import org.gentsim.framework.*
  * Note that this overwrites many of the simulation container methods, so care must be taken to 
  * keep this class coordinated with the SimulationContainer
  */
-class SimulationTestHarness extends SimulationContainer {
+class SimulationTestHarness extends Simulation {
 
   /**
    * Creates a new simulation test harness.
@@ -62,8 +62,8 @@ class SimulationTestHarness extends SimulationContainer {
     def ed = super.entityDescriptions[entityType]
     if (ed == null) throw new IllegalArgumentException("No entity type ${entityType}.")
 
-    def entity = new ContainedEntity(ed, super.nextID++, this, attrs)
-    super.storeEntity(entity)
+    def entity = new ContainedEntity(ed, nextID++, this, attrs)
+    storeEntity(entity)
     entity
   }
 
@@ -73,8 +73,8 @@ class SimulationTestHarness extends SimulationContainer {
    * @return The service that was created.
    */
   def newService (type) {
-    def svc = new Service(super.serviceDescriptions[type])
-    super.services[type] = svc
+    def svc = new Service(serviceDescriptions[type])
+    services[type] = svc
     svc
   }
 
@@ -139,5 +139,35 @@ class SimulationTestHarness extends SimulationContainer {
     entity.handleEvent(evt)
   }
 
+  /**
+   * Map of all events that were sent.  The key is the type of event and the
+   * value is a list of events of that type that were sent.
+   */
+  private sentEvents = [:]
+
+  /**
+   * Adds an event to the event queue.
+   * @param event The event to send.
+   * @return this to allow for method chaining.
+   */
+  def sendEvent (Event event) {
+    super.sendEvent(event)
+    def events = sentEvents[event.description.type]
+    if (events == null) {
+      events = []
+      sentEvents[event.description.type] = events
+    }
+    events << event
+  }
+
+  /**
+   * Return true if an event with the given name was sent.  This is 
+   * doesn't currently provide a lot of detail, but is helpful for limited testing.
+   * @param eventType The type of event.
+   * @return true if an event of the given type was ever sent.
+   */
+  boolean eventSent (String eventType) {
+    sentEvents[eventType] != null
+  }
 }
 
