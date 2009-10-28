@@ -68,6 +68,7 @@ class SimulationContainer {
    */
   SimulationContainer () {
     Trace.on("system") // start with on by default.
+    expandClasspath()
   }
 
   /**
@@ -76,6 +77,7 @@ class SimulationContainer {
    */
   SimulationContainer (String scriptName) {
     Trace.on("system") // start with on by default.
+    expandClasspath()
     this.loadDescriptionsFrom(scriptName)
   }
 
@@ -85,7 +87,32 @@ class SimulationContainer {
    */
   SimulationContainer (List scripts) {
     Trace.on("system") // start with on by default.
+    expandClasspath()
     this.loadDescriptionsFrom (scripts)
+  }
+
+  /**
+   * Expands the classpath to add predefined locations and .jars
+   */
+  def expandClasspath () {
+    Trace.trace("system", "Expanding the classpath")
+    def cl = this.class.classLoader.rootLoader
+    if (cl) {
+      File f = new File(".")
+      def lib = f.absolutePath + "/lib/"
+      Trace.trace("system", "Adding ${lib} to the classpath")
+      cl.addURL(new URL("file://${lib}"))
+    }
+
+    File f = new File ("./lib")
+    def jarPattern = ~/.*\.jar/
+    if (f.exists()) f.eachFileMatch(jarPattern) {
+      def url = "file://${it.absolutePath}"
+      Trace.trace("system", "Adding ${url} to the classpath")
+      cl.addURL(new URL(url))
+    }
+    // show the URLs in the classpath
+    if (cl) cl.getURLs().each { Trace.trace"system", "url:  ${it}"}
   }
 
   /**

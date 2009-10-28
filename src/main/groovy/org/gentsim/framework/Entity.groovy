@@ -45,6 +45,7 @@ class Entity extends Thing {
     }
     c.delegate = this
     c.setResolveStrategy(Closure.DELEGATE_ONLY)
+    if (args.size() == 1) args = args[0] // Prevents the handler from needing to unpack and looks more natural.
     c(args)
   }
 
@@ -54,7 +55,7 @@ class Entity extends Thing {
    * @throws MissingMethodException Thrown if there is no handler for the given type.
    */
   def handleEvent (Event event) {
-    Closure c
+    Closure c = null
     def allthem = description.eventHandlers.findAll { evth -> event.type.matches(evth.key) }
     def result = false
     for (listOfHandlers in allthem.values()) {
