@@ -39,7 +39,7 @@ class gentsim {
     def gg = new GentsimGenerator()
 
     String type = null
-    static final types = ["simulation", "entity", "event", "service"]
+    final types = ["simulation", "entity", "event", "service"]
 
     for (arg in args) {
       if (arg == "document") {
