@@ -50,16 +50,11 @@ class LogicalTime {
   */
   float timeOfDay (int cycle) {
     // Convert cycle to time of day in seconds.
-log.info ("${this.logicalStartTime} * 3600.0 + (${cycle} * ${this.logicalCycleLength}) ")
     float tod = (this.logicalStartTime * 3600.0) + (cycle * this.logicalCycleLength)
-log.info "tod == ${tod}"
 
     int hour = (int)(tod / 3600.0)
-log.info "hour == ${hour}"
     float rem = (tod - (hour * 3600.0)) / 3600
-log.info "rem == ${rem}"
     hour = hour % 24
-log.info "time of day for ${cycle} is ${rem + hour}"
     return hour + rem
   }
 
@@ -74,8 +69,6 @@ log.info "time of day for ${cycle} is ${rem + hour}"
     float seconds = tod - hours // seconds in fractions of an hour.
     int minutes = (int)(seconds*60)
     seconds = (seconds - minutes/60) * 3600 
-log.info "hours == ${hours} minutes == ${minutes} seconds == ${seconds}"
-log.info (String.format("%02d:%02d:%05.2f", hours, minutes, seconds))
     String.format("%02d:%02d:%05.2f", hours, minutes, seconds)
   }
 }
