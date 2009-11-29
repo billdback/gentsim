@@ -72,7 +72,7 @@ class SimulationContainer {
   }
 
   /**
-   * This creates a new simulation container.  
+   * This creates a new simulation container.
    * @param scriptName A file that contains entity descriptions to load.
    */
   SimulationContainer (String scriptName) {
@@ -82,13 +82,13 @@ class SimulationContainer {
   }
 
   /**
-   * Creates a new simulation container and loads entities from the given scripts.
-   * @param scripts List of scripts to load from.
+   * This creates a new simulation container.
+   * @param scriptNames A list of files that contains entity descriptions to load.
    */
-  SimulationContainer (List scripts) {
+  SimulationContainer (List scriptNames) {
     Trace.on("system") // start with on by default.
     expandClasspath()
-    this.loadDescriptionsFrom (scripts)
+    this.loadDescriptionsFrom(scriptNames)
   }
 
   /**
@@ -96,7 +96,7 @@ class SimulationContainer {
    */
   def expandClasspath () {
     Trace.trace("system", "Expanding the classpath")
-    def cl = this.class.classLoader.rootLoader
+    def cl = this.class.classLoader?.rootLoader
     if (cl) {
       File f = new File(".")
       def lib = f.absolutePath + "/lib/"
@@ -112,7 +112,7 @@ class SimulationContainer {
       cl.addURL(new URL(url))
     }
     // show the URLs in the classpath
-    if (cl) cl.getURLs().each { Trace.trace"system", "url:  ${it}"}
+    if (cl) cl.getURLs().each { Trace.trace("system", "url:  ${it}")}
   }
 
   /**
@@ -496,6 +496,7 @@ class SimulationContainer {
     statistics.number_commands_created += 1
     cmd
   }
+
 }
 
 

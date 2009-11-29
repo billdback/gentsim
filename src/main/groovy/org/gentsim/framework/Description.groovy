@@ -20,7 +20,7 @@ package org.gentsim.framework
 /**
  * This class is used to describe simulation entities.
  */
-class Description {
+class Description implements Serializable {
 
   final String type
   final attributes   = [:]   // name : value

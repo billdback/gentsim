@@ -20,7 +20,7 @@ package org.gentsim.framework
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-class LogicalTime {
+class LogicalTime implements Serializable {
 
   private static Log log = LogFactory.getLog("org.gentsim.log")
 

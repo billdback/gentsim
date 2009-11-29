@@ -87,7 +87,8 @@ class Simulation extends SimulationContainer {
         "/framework/events/SystemStartCommand.groovy",
         "/framework/events/SystemPauseCommand.groovy",
         "/framework/events/SystemStartupStatus.groovy",
-        "/framework/events/TimeUpdateEvent.groovy"
+        "/framework/events/TimeUpdateEvent.groovy",
+        "/framework/entities/NetworkEntity.groovy"
       ]
     )
   }
@@ -245,6 +246,42 @@ class Simulation extends SimulationContainer {
     entity 
   }
 
+  protected ServerSocket networkListenerSocket
+
+  /**
+   * Creates a connection listener for incoming network connections to the container.
+   * Connections are automatically registered for all events.
+   * @param port The port to listen on.  If this is zero a port is chosen by the system.
+   * TODO Develop a protocol for remote registration of events.
+   */
+  def createNetworkListener (int port) {
+    try {
+      networkListenerSocket = new ServerSocket(port)
+    }
+    catch (IOException ioe) {
+      Trace.trace ("system", "Unable to listen on port ${port}")
+    }
+
+    if (networkListenerSocket != null) {
+      Trace.trace("system", "Created a network listener on ${networkListenerSocket}")
+      Thread.start { // accept blocks, so this needs to be in a separate thread.
+        try {
+          while (true) {
+            networkListenerSocket.accept { s -> // other socket
+              Trace.trace("system", "New network binding added from ${s}")
+              def networkEntity = newEntity("system.network.entity", ["socket": s, "out" : new ObjectOutputStream(s.outputStream)])
+              Trace.trace("system", "entity out is ${networkEntity.out}")
+            }
+          }
+        }
+        catch (SocketException se) {
+          /* thrown when the socket is closed while awaiting accept. */
+          Trace.trace("system", "Network listener closed for shutdown")
+        }
+      }
+    }
+  }
+
   /**
    * Stops the simulation. 
    */
@@ -254,6 +291,7 @@ class Simulation extends SimulationContainer {
     statistics.elapsed_time = statistics.end_time - statistics.start_time
     super.printStatistics()
     sendEventToEntities(newEvent("system.status.shutdown"))
+    if (networkListenerSocket != null) networkListenerSocket.close()
     this.shouldStop = true
   }
 

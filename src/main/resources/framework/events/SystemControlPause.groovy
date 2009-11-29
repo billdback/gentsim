@@ -15,22 +15,6 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.framework
+import org.gentsim.framework.EventDescription
 
-/**
- * Defines all of the base capabilities of a service.  Services are special entities to
- * the container.
- */
-class Service extends Entity implements Serializable {
-  
-  /**
-   * Creates a new service.
-   * @param sd The service description.
-   * @param attrs Map of attributes and values.  This allows overwriting of the defaults.
-   */
-  Service (ServiceDescription sd, Map attrs = null) {
-    super (sd, -1, attrs)
-  }
-
-}
-
+event = new EventDescription("system.control.pause")

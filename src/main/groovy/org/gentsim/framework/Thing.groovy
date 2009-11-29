@@ -19,7 +19,7 @@ package org.gentsim.framework
 
 import groovy.lang.Closure
 
-class Thing {
+class Thing implements Serializable {
 
   /** Unique id for the thing. */
   final id

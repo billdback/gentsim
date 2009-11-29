@@ -20,7 +20,7 @@ package org.gentsim.framework
 /**
  * This class is used to describe simulation entities.
  */
-class EventDescription extends Description {
+class EventDescription extends Description implements Serializable {
 
   /**
    * Creates a new event that can be instantiated in the simulation.

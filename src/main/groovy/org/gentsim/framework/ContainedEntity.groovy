@@ -17,7 +17,7 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-class ContainedEntity extends Entity {
+class ContainedEntity extends Entity implements Serializable {
 
   /** The container of the entity. */
   private SimulationContainer container

@@ -218,5 +218,30 @@ class TestSimulation {
       s.statistics.number_events_sent == 1
   }
 
+  def "Test creating network connections to the simulation" () {
+    setup:
+      Simulation s = new Simulation()
+      s.cycleLength = 100
+      def evtd = new EventDescription("test-event", ["value1" : 1, "value2" : "two"])
+      s.addEventDescription(evtd)
+
+    when:
+      s.createNetworkListener(8888) // assuming got created
+      Socket socket = new Socket(InetAddress.getLocalHost(), 8888)
+      ObjectInputStream instream = new ObjectInputStream(socket.inputStream)
+      Thread.start() {
+        def evt
+        while ((evt = instream.readObject()) != null) {
+          println "read: ${evt}"
+        }
+      }
+      Thread.sleep(100)
+      s.sendEvent(s.newEvent("test-event"))
+      s.run(10)
+    then:
+      // verify that the correct events were received back.
+      socket != null
+  }
+
 }
 

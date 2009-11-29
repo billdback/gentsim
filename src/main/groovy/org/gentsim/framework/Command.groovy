@@ -20,7 +20,7 @@ package org.gentsim.framework
 /**
  * Commands are special cases of events that are targeted to specific entities.
  */
-class Command extends Event {
+class Command extends Event implements Serializable {
 
   /** Target of the command. */
   private target

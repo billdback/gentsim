@@ -32,7 +32,7 @@ class TimeEventQueue {
    * prevents having old events.  Furthermore, events can be added without a time and they will automatically
    * be set to the next time.
    */
-  int currentTime = 0;
+  int currentTime = 0
 
   /**
    * Adds an event to the queue.  
@@ -61,13 +61,14 @@ class TimeEventQueue {
     add(event)
   }
 
+  /** Current list of events in the queue. */
+  def currentList = []
+
   /**
    * Returns the next event or a null if there are no more events.
    * @return The next event or a null if there are no more events.
    */
   def next() {
-    static currentList = [] // NOTE:  hard to distribute.
-
     if (currentList.isEmpty()) {
       try { // queue could be totally empty.
         this.currentTime = this.eventQueue.firstKey()

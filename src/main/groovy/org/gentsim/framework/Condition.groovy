@@ -21,7 +21,7 @@ package org.gentsim.framework
  * This class allows complex conditions to be formed.  This is used to express interest in entities and events.
  * Anything that has a map called "attributes" can have conditions set against it.
  */
-class Condition {
+class Condition implements Serializable {
 
   private final conditions = [] // list of closures to test for conditions.
 

@@ -22,7 +22,7 @@ import groovy.lang.Closure
 /**
  * This class is used to describe simulation entities.
  */
-class EntityDescription extends Description {
+class EntityDescription extends Description implements Serializable {
 
   final methods                   = [:]   // name : Closure
 

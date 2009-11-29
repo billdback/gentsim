@@ -17,7 +17,7 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-class Event extends Thing {
+class Event extends Thing implements Serializable {
 
   int time = 0
 
