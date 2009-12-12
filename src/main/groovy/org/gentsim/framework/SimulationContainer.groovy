@@ -17,9 +17,8 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.gentsim.util.Trace
+import org.gentsim.util.trace.Trace
 
-import org.perf4j.*
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 

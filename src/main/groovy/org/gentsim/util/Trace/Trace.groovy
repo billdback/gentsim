@@ -15,10 +15,7 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+package org.gentsim.util.trace
 
 /**
  * This class will print trace messages to log4j.debug.  Tracing can be turned
@@ -26,11 +23,18 @@ import org.apache.commons.logging.LogFactory;
  */
 class Trace {
 
-  /** Default logger for gentsim. */
-  private static Log log = LogFactory.getLog("org.gentsim.log")
-
   /** List of things to trace. */
   private static Set traces = new HashSet()
+
+  /** Trace writers for writing out traces. */
+  private static traceWriters = []
+
+  /**
+   * Adds a trace writer to the list of traces.  trace messages will be sent to all writers.
+   */
+  static addTraceWriter (TraceWriter tw) {
+    traceWriters << tw
+  }
 
   /** Adds something else to trace. */
   static on (String t) {
@@ -41,13 +45,16 @@ class Trace {
   static off (String t) {
     traces.remove(t)
   }
+
   /**
-   * Adds a trace message to the log.
+   * Writes a trace message if the trace is turned on.
    * @param t The trace (that may or may not be set).
    * @param msg The message to trace if tracing for this type is on.
    */
   static trace (String t, String msg) {
-    if (traces.contains(t)) { log.info("[${t}] ${msg}")}
+    if (traces.contains(t)) {
+      traceWriters.each { it.trace(t, msg) }
+    }
   }
 
 }

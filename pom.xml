@@ -9,7 +9,7 @@
   <groupId>org.gentsim</groupId>
   <artifactId>gentsim</artifactId>
   <name>GEntSim Project</name>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
 
   <dependencies>
     
@@ -61,6 +61,12 @@
       <artifactId>junit</artifactId>
       <version>4.5</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>activemq-core</artifactId>
+      <version>5.3.0</version>
     </dependency>
 
   </dependencies>

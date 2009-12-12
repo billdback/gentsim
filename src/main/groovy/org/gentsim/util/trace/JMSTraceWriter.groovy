@@ -1,5 +1,5 @@
 /*
-Copyright Â© 2009 William D. Back
+Copyright © 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -15,24 +15,32 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.framework
+package org.gentsim.util.trace
 
-import java.net.*
+import javax.jms.Session
 
 /**
- * Provides a resource connector for the GroovyScriptEngine to use to load resources.
- * @returns A ULRConnection to the resource.
- * @throws ResourceException Thrown if there is a problem finding or connecting to the resource.
+ * Writes trace messages to JMS.
+ * @author Bill Back
  */
-class ScriptEngineConnector implements ResourceConnector {
-  def URLConnection getResourceConnection (String name) throws ResourceException {
-    try {
-      def url = getClass().getResource(name)
-      def cnx = url.openConnection()
-      cnx
-    }
-    catch (NullPointerException npe) {
-      throw new ResourceException ("Unable to locate resource ${name}")
-    }
+class JMSTraceWriter implements TraceWriter {
+
+  /** Session for talking to ActiveMQ. */
+  Session session
+
+  /**
+   * Creates a new JMS trace writer.
+   * @param JMSConnection connection to the JMS broker to talk to.
+   */
+  JMSTraceWriter(JMSConnection) {
+  }
+
+  /**
+   * Writes a trace message to JMS.
+   * @param t The trace name.
+   * @param msg The message to write. 
+   */
+  def trace (String t, String msg) {
+
   }
 }

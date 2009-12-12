@@ -15,28 +15,21 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util
+package org.gentsim.util.trace
 
 import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 
 @Speck
 @RunWith(Sputnik)
-class TestUtil {
+class TestJMSTraceWriter {
 
-  def "Test converting a file to a string"() {
-    when:
-      def s = Util.FileToString (new File("src/test/resources/entities/Animals.groovy"))
-    then:
-      s.contains("cat = new EntityDescription(\"cat\")")
+  def "Test creating JMS trace writer"() {
+    
   }
 
-  def "Test converting a file to string buffer"() {
-    when:
-      def sb = Util.FileToStringBuffer (new File("src/test/resources/entities/Animals.groovy"))
-    then:
-      sb.toString().contains("cat = new EntityDescription(\"cat\")")
+  def "Test writing trace message to JMS" () {
+
   }
 }
 

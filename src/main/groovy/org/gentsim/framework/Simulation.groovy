@@ -17,9 +17,9 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.gentsim.util.Trace
+import org.gentsim.util.trace.Trace
+import org.gentsim.util.trace.Log4JTraceWriter
 
-import org.perf4j.*
 /**
  * The simulation class is the main driver for the simulation, combining the container with the 
  * execution.
@@ -68,6 +68,8 @@ class Simulation extends SimulationContainer {
    * Performs common actions needed to initialize the simulation.
    */
   private setupSimulation() {
+    // TODO:  Make this configurable.
+    Trace.addTraceWriter(new Log4JTraceWriter())
     addStatistics()
     loadDefaultDescriptions()
   }
@@ -82,13 +84,12 @@ class Simulation extends SimulationContainer {
         "/framework/events/EntityCreatedEvent.groovy",
         "/framework/events/EntityDestroyedEvent.groovy",
         "/framework/events/EntityStateChangedEvent.groovy",
-        "/framework/events/SystemShutdownCommand.groovy",
-        "/framework/events/SystemShutdownStatus.groovy",
-        "/framework/events/SystemStartCommand.groovy",
-        "/framework/events/SystemPauseCommand.groovy",
-        "/framework/events/SystemStartupStatus.groovy",
-        "/framework/events/TimeUpdateEvent.groovy",
-        "/framework/entities/NetworkEntity.groovy"
+        "/framework/events/SystemControlShutdown.groovy",
+        "/framework/events/SystemControlStart.groovy",
+        "/framework/events/SystemControlPause.groovy",
+        "/framework/events/SystemStatusShutdown.groovy",
+        "/framework/events/SystemStatusStartup.groovy",
+        "/framework/events/TimeUpdateEvent.groovy"
       ]
     )
   }
@@ -160,13 +161,13 @@ class Simulation extends SimulationContainer {
     this.eventQueue << event
     // check for system commands that take place immediately.
     switch (event.description.type) {
-      case "system.command.shutdown":
+      case "system.control.shutdown":
         stop()
         break
-      case "system.command.start":
+      case "system.control.start":
         this.paused = false
         break
-      case "system.command.pause":
+      case "system.control.pause":
         this.paused = true
         break
     }

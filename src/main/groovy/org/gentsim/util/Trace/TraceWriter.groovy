@@ -15,28 +15,19 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util
+package org.gentsim.util.trace
 
-import org.junit.runner.RunWith
-import spock.lang.*
-import static spock.lang.Predef.*
+/**
+ * Interface for specific tracers of messages.  A tracer is simply something that allows users to trace messages
+ * to some output for debugging, etc.
+ */
+public interface TraceWriter {
 
-@Speck
-@RunWith(Sputnik)
-class TestUtil {
+  /**
+   * Send a trace message.
+   * @param t The trace to send to.
+   * @param msg The message to send to.
+   */
+  def trace (String t, String msg);
 
-  def "Test converting a file to a string"() {
-    when:
-      def s = Util.FileToString (new File("src/test/resources/entities/Animals.groovy"))
-    then:
-      s.contains("cat = new EntityDescription(\"cat\")")
-  }
-
-  def "Test converting a file to string buffer"() {
-    when:
-      def sb = Util.FileToStringBuffer (new File("src/test/resources/entities/Animals.groovy"))
-    then:
-      sb.toString().contains("cat = new EntityDescription(\"cat\")")
-  }
 }
-

@@ -21,7 +21,6 @@ class TestSimulationTestHarness {
       def cat = sth.newEntity("cat")
     then:
       cat.type == "cat"
-//      cat.size == AnimalSize.small
   }
 
   def "Test create service"() {
