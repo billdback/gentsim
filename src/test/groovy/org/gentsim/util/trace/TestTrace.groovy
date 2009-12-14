@@ -34,58 +34,60 @@ class TestTrace {
   
   def "Test adding a trace"() {
     setup:
-      Trace.addTraceWriter (new InternalTraceWriter())
+      Trace.addTraceWriter ({tr, msg -> true } as TraceWriter)
     expect:
       Trace.traces.isEmpty()
       Trace.traceWriters.size() == 1
   }
 
-  def "Test writing to single trace writer"() {
+  def "Test writing to a single trace" () {
     setup:
       Trace.on("test")
-      TraceWriter tw = new InternalTraceWriter()
-      Trace.trace("test", "test message 1") // just make sure it doesn't blow up
+      Trace.trace("test", "test message") // just make sure it doesn't blow up
+      def trace = ""
+      def message = ""
+      Trace.addTraceWriter ({tr, msg -> trace = tr; message = msg } as TraceWriter)
 
     when:
-      Trace.addTraceWriter (tw)
       Trace.trace("test", "test message 2")
     then:
-      tw.trace == "test"
-      tw.message == "test message 2"
+      trace == "test"
+      message == "test message 2"
 
     when:
       Trace.off("test")
       Trace.trace("test", "test message 3")
     then:
-      tw.trace == "test"
-      tw.message == "test message 2" // didn't change
+      trace == "test"
+      message == "test message 2" // didn't change
 
     when:
       Trace.on("test")
       Trace.trace("test", "test message 4")
     then:
-      tw.trace == "test"
-      tw.message == "test message 4"
+      trace == "test"
+      message == "test message 4"
   }
 
-  def "Test writing to multiple trace writers"() {
+  def "Test writing to multiple trace writers" () {
     setup:
-      Trace t = new Trace()
       Trace.on("test")
-      TraceWriter tw1 = new InternalTraceWriter()
-      Trace.addTraceWriter(tw1)
-      TraceWriter tw2 = new InternalTraceWriter()
-      Trace.addTraceWriter(tw2)
+      Trace.trace("test", "test message") // just make sure it doesn't blow up
+      def trace1 = ""
+      def message1 = ""
+      def trace2 = ""
+      def message2 = ""
+      Trace.addTraceWriter ({tr, msg -> trace1 = tr; message1 = msg } as TraceWriter)
+      Trace.addTraceWriter ({tr, msg -> trace2 = tr; message2 = msg } as TraceWriter)
 
     when:
       Trace.trace("test", "test message")
     then:
-      tw1.trace == "test"
-      tw1.message == "test message"
-      tw2.trace == "test"
-      tw2.message == "test message"
+      trace1 == "test"
+      message1 == "test message"
+      trace2 == "test"
+      message2 == "test message"
   }
-
 
 }
 
