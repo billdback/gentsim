@@ -28,6 +28,6 @@ public interface TraceWriter {
    * @param t The trace to send to.
    * @param msg The message to send to.
    */
-  def trace (String t, String msg);
+  def trace (String t, String msg)
 
 }
