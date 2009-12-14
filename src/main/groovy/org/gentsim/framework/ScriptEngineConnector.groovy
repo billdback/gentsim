@@ -20,11 +20,16 @@ package org.gentsim.framework
 import java.net.*
 
 /**
- * Provides a resource connector for the GroovyScriptEngine to use to load resources.
- * @returns A ULRConnection to the resource.
- * @throws ResourceException Thrown if there is a problem finding or connecting to the resource.
+ * Creates a connector to the script engine.
+ * @author Bill Back
  */
 class ScriptEngineConnector implements ResourceConnector {
+
+  /**
+   * Provides a resource connector for the GroovyScriptEngine to use to load resources.
+   * @returns A ULRConnection to the resource.
+   * @throws ResourceException Thrown if there is a problem finding or connecting to the resource.
+   */
   def URLConnection getResourceConnection (String name) throws ResourceException {
     try {
       def url = getClass().getResource(name)
