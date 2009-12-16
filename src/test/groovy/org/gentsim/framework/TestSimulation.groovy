@@ -20,6 +20,7 @@ package org.gentsim.framework
 import org.junit.runner.RunWith
 import spock.lang.*
 import static spock.lang.Predef.*
+import org.gentsim.util.Statistics
 
 @Speck
 @RunWith(Sputnik)
@@ -31,10 +32,10 @@ class TestSimulation {
     setup:
 
     expect:
-      s.getEventDescription("time-update")
-      s.getEventDescription("entity-created")
-      s.getEventDescription("entity-destroyed")
-      s.getEventDescription("entity-state-changed")
+      s.container.getEventDescription("time-update")
+      s.container.getEventDescription("entity-created")
+      s.container.getEventDescription("entity-destroyed")
+      s.container.getEventDescription("entity-state-changed")
   }
 
   def "Test setting the cycle limit"() {
@@ -56,7 +57,7 @@ class TestSimulation {
       entd.shutdownCalled = false
       entd.handleEvent ("system.status.startup") { startupCalled = true }
       entd.handleEvent ("system.status.shutdown") { shutdownCalled = true }
-      s.addEntityDescription(entd)
+      s.container.addEntityDescription(entd)
       def ent = s.newEntity("system-msg-handler")
 
     when:
@@ -77,7 +78,7 @@ class TestSimulation {
       entd.shutdownCalled = false
       entd.handleEvent ("system.status.startup") { startupCalled = true }
       entd.handleEvent ("system.status.shutdown") { shutdownCalled = true }
-      s.addEntityDescription(entd)
+      s.container.addEntityDescription(entd)
       def ent = s.newEntity("system-msg-handler")
 
     when:
@@ -95,7 +96,7 @@ class TestSimulation {
       def ed1 = new EntityDescription("entity1")
       ed1.initCalled = false
       ed1.method ("init") { initCalled = true }
-      s.addEntityDescription(ed1)
+      s.container.addEntityDescription(ed1)
 
     when:
       def e1 = s.newEntity("entity1")
@@ -111,9 +112,9 @@ class TestSimulation {
       ed1.attribute "called", 0
       ed1.handleEntityCreated("entity2") { entity -> called += 1 }
       ed1.handleEntityDestroyed("entity2") { entity -> called -= 1 }
-      s.addEntityDescription(ed1)
+      s.container.addEntityDescription(ed1)
       def ed2 = new EntityDescription("entity2")
-      s.addEntityDescription(ed2)
+      s.container.addEntityDescription(ed2)
 
     when:
       def e1 = s.newEntity("entity1")
@@ -124,7 +125,7 @@ class TestSimulation {
       e1.called == 2
 
     when:
-      s.removeEntity(e2_1)
+      s.removeEntity(e2_1.id)
       s.cycle()
     then:
       e1.called == 1
@@ -142,12 +143,12 @@ class TestSimulation {
       ed3.attribute "called", 0
       ed3.handleEntityCreated("entity4") { entity -> called += 1 }
       ed3.handleEntityDestroyed("entity4") { entity -> called -= 1 }
-      s.addEntityDescription(ed3)
+      s.container.addEntityDescription(ed3)
 
       def ed4 = new EntityDescription("entity4")
       ed4.attribute "called", 0
       ed4.handleEntityStateChanged ("entity3", "called") { entity -> called += 1 }
-      s.addEntityDescription(ed4)
+      s.container.addEntityDescription(ed4)
 
     when:
       def e3 = s.newEntity("entity3")
@@ -160,7 +161,7 @@ class TestSimulation {
       e4_1.called == 2
 
     when:
-      s.removeEntity(e4_1)
+      s.removeEntity(e4_1.id)
       s.cycle()
       s.cycle() // needed to send all events
     then:
@@ -173,9 +174,9 @@ class TestSimulation {
       def ed1 = new EntityDescription("entity1")
       ed1.attribute "called", 0
       ed1.handleEvent("event1") { event -> called += 1 }
-      s.addEntityDescription(ed1)
-      s.addEventDescription(new EventDescription("event1"))
-      s.addEventDescription(new EventDescription("event2"))
+      s.container.addEntityDescription(ed1)
+      s.container.addEventDescription(new EventDescription("event1"))
+      s.container.addEventDescription(new EventDescription("event2"))
 
     when:
       def e1 = s.newEntity("entity1")
@@ -203,7 +204,7 @@ class TestSimulation {
       Simulation s = new Simulation()
       def ed = new EntityDescription("some-entity")
       ed.handleEvent ("new-event") {}
-      s.addEntityDescription(ed)
+      s.container.addEntityDescription(ed)
 
     when:
       s.newEntity ("some-entity")
@@ -211,11 +212,11 @@ class TestSimulation {
       s.run(1000)
       while (!s.isStopped()) sleep(100) // wait for the simulation to stop.
     then:
-      s.statistics.start_time != 0 && s.statistics.start_time < new Date().getTime()
-      s.statistics.end_time   != 0 && s.statistics.end_time   < new Date().getTime()
-      s.statistics.elapsed_time > 0
-      s.statistics.number_cycles == 1000
-      s.statistics.number_events_sent == 1
+      Statistics.instance.start_time != 0 && Statistics.instance.start_time < new Date().getTime()
+      Statistics.instance.end_time   != 0 && Statistics.instance.end_time   < new Date().getTime()
+      Statistics.instance.elapsed_time > 0
+      Statistics.instance.number_cycles == 1000
+      Statistics.instance.number_events_sent == 1
   }
 
 }

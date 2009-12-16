@@ -15,23 +15,21 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.framework.distributed
+package org.gentsim.jms
 
-/**
- * Interface to define common constants for working with JMS.
- * @author Bill Back
- */
-public interface JMSConstants {
+import org.junit.runner.RunWith
+import spock.lang.*
 
-  // JMS constants for configuration
-  static final String JMSDistributed        = "gentsim.jms.distributed"
-  static final String JMSIP                 = "gentsim.jms.IP"
-  static final String JMSPort               = "gentsim.jms.port"
+@Speck
+@RunWith(Sputnik)
+class TestJMSTraceWriter {
 
-  // JMS Topics
-  static final String JMSSystemControlTopic = "gentsim.system.control"
-  static final String JMSSystemStatusTopic  = "gentsim.system.status"
-  static final String JMSSystemTraceTopic   = "gentsim.system.trace"
-  static final String JMSEventTopic         = "gentsim.events"
+  def "Test creating JMS trace writer"() {
+    
+  }
 
+  def "Test writing trace message to JMS" () {
+
+  }
 }
+

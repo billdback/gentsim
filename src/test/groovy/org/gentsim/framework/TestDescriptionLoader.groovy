@@ -15,19 +15,23 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util.trace
+package org.gentsim.framework
 
-/**
- * Interface for specific tracers of messages.  A tracer is simply something that allows users to trace messages
- * to some output for debugging, etc.
- */
-public interface TraceWriter {
+import spock.lang.*
+import org.junit.runner.RunWith
 
-  /**
-   * Send a trace message.
-   * @param t The trace to send to.
-   * @param msg The message to send to.
-   */
-  def trace (String t, String msg)
+@Speck
+@RunWith(Sputnik)
+class TestDescriptionLoader {
 
+  def "Test loading descriptions from a list"() {
+    setup:
+      def called = 0
+      def loader = [loadDescriptionsFromLocation : {loc, sc -> called++ }] as DescriptionLoader
+
+    when:
+      loader.loadDescriptionsFromLocations(["a", "b", "c"], null)
+    then:
+      called == 3
+  }
 }

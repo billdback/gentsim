@@ -15,7 +15,7 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util.trace
+package org.gentsim.util
 
 /**
  * This class will print trace messages to log4j.debug.  Tracing can be turned

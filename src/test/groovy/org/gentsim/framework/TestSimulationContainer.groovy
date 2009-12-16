@@ -20,6 +20,7 @@ package org.gentsim.framework
 import org.junit.runner.RunWith
 import spock.lang.*
 import static spock.lang.Predef.*
+import org.gentsim.util.Statistics
 
 @Speck
 @RunWith(Sputnik)
@@ -145,75 +146,6 @@ class TestSimulationContainer {
       sc.removeEntity(eid)
     then:
       thrown(IllegalArgumentException)
-  }
-
-  def "Test loading a description from a named file" () {
-    setup:
-      SimulationContainer sc = new SimulationContainer()
-      // Assumes running test from the root location.
-      sc.loadDescriptionsFrom "src/test/resources/entities/Animals.groovy"
-
-    expect:
-      sc.getEntityDescription("car") == null
-      sc.getEntityDescription("cat")
-  }
-
-  def "Test loading descriptions from a directory" () {
-    setup:
-      SimulationContainer sc = new SimulationContainer()
-      sc.loadDescriptionsFrom "src/test/resources/entities"
-
-    expect:
-      sc.getEntityDescription("car")
-      sc.getEntityDescription("cat")
-  }
-
-  def "Test loading descriptions from multiple locations" () {
-    setup:
-      SimulationContainer sc = new SimulationContainer()
-      sc.loadDescriptionsFrom (["src/test/resources/entities",
-                                "src/test/resources/events",
-                                "src/test/resources/services"
-                               ])
-    expect:
-      sc.getEntityDescription("car")
-      sc.getEntityDescription("cat")
-      sc.getEventDescription("some-event")
-      sc.getServiceDescription("date")
-  }
-
-  def "Test loading a description from a named file as a resource" () {
-    setup:
-      SimulationContainer sc = new SimulationContainer()
-      sc.loadDescriptionsFrom "/entities/Animals.groovy"
-
-    expect:
-      sc.getEntityDescription("car") == null
-      sc.getEntityDescription("cat")
-  }
-
-  def "Test loading descriptions from a directory as a resource" () {
-    setup:
-      SimulationContainer sc = new SimulationContainer()
-      sc.loadDescriptionsFrom "/entities"
-
-    expect:
-      sc.getEntityDescription("car")
-      sc.getEntityDescription("cat")
-  }
-
-  def "Test loading descriptions from multiple locations as a resource" () {
-    setup:
-      SimulationContainer sc = new SimulationContainer()
-      sc.loadDescriptionsFrom (["/entities",
-                                "/events",
-                                "/services"
-                               ])
-    expect:
-      sc.getEntityDescription("car")
-      sc.getEntityDescription("cat")
-      sc.getEventDescription("some-event")
-      sc.getServiceDescription("date")
   }
 
   def "Test creating a new service" () {
@@ -419,16 +351,15 @@ class TestSimulationContainer {
      sc.newCommand("some-event", 2)
      sc.newCommand("some-event", 3)
      sc.removeEntity(ent)
-sc.printStatistics()
    then:
-     sc.statistics.number_entity_descriptions == 1
-     sc.statistics.number_service_descriptions == 1
-     sc.statistics.number_event_descriptions == 1
-     sc.statistics.number_entities_created == 3
-     sc.statistics.number_entities_removed == 1
-     sc.statistics.number_services_created == 3
-     sc.statistics.number_events_created == 3
-     sc.statistics.number_commands_created == 3
+     Statistics.instance.number_entity_descriptions == 1
+     Statistics.instance.number_service_descriptions == 1
+     Statistics.instance.number_event_descriptions == 1
+     Statistics.instance.number_entities_created == 3
+     Statistics.instance.number_entities_removed == 1
+     Statistics.instance.number_services_created == 3
+     Statistics.instance.number_events_created == 3
+     Statistics.instance.number_commands_created == 3
   }
 
 }

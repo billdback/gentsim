@@ -15,9 +15,10 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util.trace
+package org.gentsim.jms
 
 import javax.jms.Session
+import org.gentsim.util.TraceWriter
 
 /**
  * Writes trace messages to JMS.

@@ -15,15 +15,25 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util.trace
+package org.gentsim.util
 
-class InternalTraceWriter implements TraceWriter {
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory
 
-  String trace = ""
-  String message = ""
+/**
+ * Traces messages to Log4J.
+ */
+class Log4JTraceWriter implements TraceWriter {
+
+  /** Default logger for gentsim. */
+  private static Log log = LogFactory.getLog("org.gentsim.log")
+
+  /**
+   * Send a trace message.
+   * @param t The trace to send to.
+   * @param msg The message to send to.
+   */
   def trace (String t, String msg) {
-    trace = t
-    message = msg
+    log.info("[${t}] ${msg}")
   }
 }
-

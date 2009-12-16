@@ -17,20 +17,27 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.gentsim.util.trace.Trace
-import org.gentsim.util.trace.Log4JTraceWriter
+import org.gentsim.util.Trace
+import org.gentsim.util.Log4JTraceWriter
+import org.gentsim.util.Statistics
 
 /**
  * The simulation class is the main driver for the simulation, combining the container with the 
  * execution.
  */
-class Simulation extends SimulationContainer {
+class Simulation {
 
   /** flag to stop the simulation.  */
   protected final shouldStop = false
 
   /** event queue for events. */
   protected final eventQueue = new TimeEventQueue()
+
+  /** Simulation container for holding entities and descriptions. */
+  protected final container = new SimulationContainer()
+
+  /** Description loader to use to load descriptions. */
+  protected final DescriptionLoader descriptionLoader = new FileSystemDescriptionLoader()
 
   /** Defines a minimum length (in milliseconds) for each cycle, mainly for user in the loop. */
   protected int cycleLength = 0
@@ -80,7 +87,7 @@ class Simulation extends SimulationContainer {
   def loadDefaultDescriptions() {
     // Note:  due to a constraint in the JarURLConnection, directories as resources aren't handled.
     //        Each file to be loaded must be listed.
-    this.loadDescriptionsFrom ( [
+    this.descriptionLoader.loadDescriptionsFromLocations ( [
         "/framework/events/EntityCreatedEvent.groovy",
         "/framework/events/EntityDestroyedEvent.groovy",
         "/framework/events/EntityStateChangedEvent.groovy",
@@ -90,18 +97,17 @@ class Simulation extends SimulationContainer {
         "/framework/events/SystemStatusShutdown.groovy",
         "/framework/events/SystemStatusStartup.groovy",
         "/framework/events/TimeUpdateEvent.groovy"
-      ]
+      ], this.container
     )
   }
 
   /** Adds statistics to the parent class. */
   def addStatistics () {
-    statistics.putAll(["start_time"         : 0,
-                       "end_time"           : 0,
-                       "elapsed_time"       : 0,
-                       "number_cycles"      : 0,
-                       "number_events_sent" : 0
-                      ])
+    Statistics.instance.start_time         = 0
+    Statistics.instance.end_time           = 0
+    Statistics.instance.elapsed_time       = 0
+    Statistics.instance.number_cycles      = 0
+    Statistics.instance.number_events_sent = 0
   }
 
   /**
@@ -109,9 +115,9 @@ class Simulation extends SimulationContainer {
    */
   def run() {
     Trace.trace("system", "starting the simulation")
-    statistics.start_time = new Date().getTime()
+    Statistics.instance.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(newEvent("system.status.startup"))
+      sendEventToEntities(container.newEvent("system.status.startup"))
       while (!this.shouldStop) {
         if (paused) Thread.sleep 100
         else cycle()
@@ -125,9 +131,9 @@ class Simulation extends SimulationContainer {
    */
   def run(int nbrCycles) {
     Trace.trace("system", "starting the simulation for ${nbrCycles} cycles")
-    statistics.start_time = new Date().getTime()
+    Statistics.instance.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(newEvent("system.status.startup"))
+      sendEventToEntities(container.newEvent("system.status.startup"))
       int cnt = 0
       while (cnt < nbrCycles && !this.shouldStop) {
         if (paused) Thread.sleep 100
@@ -146,7 +152,7 @@ class Simulation extends SimulationContainer {
    */
   def cycle () {
     def start_time = System.currentTimeMillis()
-    statistics.number_cycles += 1
+    Statistics.instance.number_cycles += 1
     processCurrentEvents()
     def stop_time = System.currentTimeMillis()
     if ((stop_time - start_time) < cycleLength) Thread.sleep (cycleLength - (stop_time - start_time))
@@ -194,11 +200,11 @@ class Simulation extends SimulationContainer {
     Trace.trace("events", "Sending ${event.type} ${event.attributes} to entities at time ${event.time}")
     //StopWatch watch = new LoggingStopWatch("Simulation.sendEventToEntities")
     def old_attributes = [:]
-    super.getEntitiesWhoHandleEvent (event).each { ent ->
+    this.container.getEntitiesWhoHandleEvent (event).each { ent ->
       old_attributes.clear()
       old_attributes.putAll(ent.attributes)
       ent.handleEvent(event)
-      statistics.number_events_sent += 1
+      Statistics.instance.number_events_sent += 1
 
       // see if anything changed.
       def changed_attr = []
@@ -206,7 +212,7 @@ class Simulation extends SimulationContainer {
         if (old_attributes[attr.key] != ent.attributes[attr.key]) changed_attr << attr.key
       }
       if (changed_attr != []) {
-        def escevt = super.newEvent("entity-state-changed", 
+        def escevt = this.newEvent("entity-state-changed",
           ["entity_type": ent.type, "entity": ent, "changed_attributes": changed_attr])
         Trace.trace("entities", "${ent.type} changed attributes ${changed_attr}")
         sendEvent(escevt)
@@ -223,10 +229,11 @@ class Simulation extends SimulationContainer {
    * @return A new entity of the given type.
    */
   def newEntity (entityType, Map attrs = null) throws IllegalArgumentException {
-    def entity = super.newEntity(entityType, attrs)
-    
+    def entity = this.container.newEntity(entityType, attrs)
+    entity.simulation = this
+
     // Sends event to entities who are interested in this new entity
-    def evt = super.newEvent("entity-created", ["entity_type": entity.type, "entity": entity])
+    def evt = this.newEvent("entity-created", ["entity_type": entity.type, "entity": entity])
     sendEvent(evt)
 
     entity
@@ -238,61 +245,57 @@ class Simulation extends SimulationContainer {
    * @return The entity that was removed or null if it didn't exist.
    */
   def removeEntity (int entityId) {
-    def entity = super.removeEntity(entityId)
+    def entity = this.container.removeEntity(entityId)
 
     // Sends event to entities who are interested in this new entity
-    def evt = super.newEvent("entity-destroyed", ["entity_type": entity.type, "entity": entity])
+    def evt = this.container.newEvent("entity-destroyed", ["entity_type": entity.type, "entity": entity])
     sendEvent(evt)
 
     entity 
   }
 
-  protected ServerSocket networkListenerSocket
-
   /**
-   * Creates a connection listener for incoming network connections to the container.
-   * Connections are automatically registered for all events.
-   * @param port The port to listen on.  If this is zero a port is chosen by the system.
-   * TODO Develop a protocol for remote registration of events.
+   * Creates a service and stores in the list of services.
+   * @param type The type of service to create.
+   * @return The service that was created.
+   * TODO Use the @Delegate when 1.7 is released.
    */
-  def createNetworkListener (int port) {
-    try {
-      networkListenerSocket = new ServerSocket(port)
-    }
-    catch (IOException ioe) {
-      Trace.trace ("system", "Unable to listen on port ${port}")
-    }
-
-    if (networkListenerSocket != null) {
-      Trace.trace("system", "Created a network listener on ${networkListenerSocket}")
-      Thread.start { // accept blocks, so this needs to be in a separate thread.
-        try {
-          while (true) {
-            networkListenerSocket.accept { s -> // other socket
-              Trace.trace("system", "New network binding added from ${s}")
-              def networkEntity = newEntity("system.network.entity", ["socket": s, "out" : new ObjectOutputStream(s.outputStream)])
-              Trace.trace("system", "entity out is ${networkEntity.out}")
-            }
-          }
-        }
-        catch (SocketException se) {
-          /* thrown when the socket is closed while awaiting accept. */
-          Trace.trace("system", "Network listener closed for shutdown")
-        }
-      }
-    }
+  def newService (type) {
+     this.container.newService(type)
   }
 
   /**
-   * Stops the simulation. 
+   * Creates a event.
+   * @param type The type of the event.
+   * @param attrs Attributes to set on the event.
+   * @return The event that was created.
+   * TODO Use the @Delegate when 1.7 is released.
+   */
+  def newEvent (type, Map attrs = null) {
+    this.container.newEvent(type, attrs)
+  }
+
+  /**
+   * Creates a command.
+   * @param type The type of command to create.
+   * @param tgt The target of the command.
+   * @param attrs Attributes to set on the command.
+   * @return The command that was creatcd.
+   * TODO Use the @Delegate when 1.7 is released.
+   */
+  def newCommand (type, tgt, Map attrs = null) {
+    this.container.newCommand(type, tgt, attrs)
+  }
+
+  /*
+   * Stops the simulation.
    */
   def stop() {
     Trace.trace("system", "stopping the simulation")
-    statistics.end_time = new Date().getTime()
-    statistics.elapsed_time = statistics.end_time - statistics.start_time
-    super.printStatistics()
-    sendEventToEntities(newEvent("system.status.shutdown"))
-    if (networkListenerSocket != null) networkListenerSocket.close()
+    Statistics.instance.end_time = new Date().getTime()
+    Statistics.instance.elapsed_time = Statistics.instance.end_time - Statistics.instance.start_time
+    Statistics.instance.printStatistics()
+    sendEventToEntities(container.newEvent("system.status.shutdown"))
     this.shouldStop = true
   }
 

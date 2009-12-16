@@ -17,31 +17,14 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.gentsim.util.trace.Trace
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+import org.gentsim.util.Trace
+import org.gentsim.util.Statistics
 
 /**
  * A simulation container owns all of the simulation entities.
+ * @author Bill Back
  */
 class SimulationContainer {
-
-  private static Log log = LogFactory.getLog("org.gentsim.log")
-
-  /** Map of statistics about the simulation execution. */
-  public statistics = ["number_entity_descriptions" : 0,
-                       "number_service_descriptions": 0,
-                       "number_event_descriptions"  : 0,
-                       "number_entities_created"    : 0,
-                       "number_entities_removed"    : 0,
-                       "number_services_created"    : 0,
-                       "number_events_created"      : 0,
-                       "number_commands_created"    : 0
-                      ]
-
-  /** Prints the statistics for the simulation. */
-  def printStatistics() { statistics.each { Trace.trace("statistics", "${it.key}: ${it.value}") } }
 
   /** Keeps track of the next ID for this container. */
   protected nextID = 1
@@ -67,27 +50,22 @@ class SimulationContainer {
    */
   SimulationContainer () {
     Trace.on("system") // start with on by default.
+    setupStats()
     expandClasspath()
   }
 
   /**
-   * This creates a new simulation container.
-   * @param scriptName A file that contains entity descriptions to load.
+   * Sets up the statistics used by the container.
    */
-  SimulationContainer (String scriptName) {
-    Trace.on("system") // start with on by default.
-    expandClasspath()
-    this.loadDescriptionsFrom(scriptName)
-  }
-
-  /**
-   * This creates a new simulation container.
-   * @param scriptNames A list of files that contains entity descriptions to load.
-   */
-  SimulationContainer (List scriptNames) {
-    Trace.on("system") // start with on by default.
-    expandClasspath()
-    this.loadDescriptionsFrom(scriptNames)
+  def setupStats() {
+    Statistics.instance.number_entity_descriptions  = 0
+    Statistics.instance.number_service_descriptions = 0
+    Statistics.instance.number_event_descriptions   = 0
+    Statistics.instance.number_entities_created     = 0
+    Statistics.instance.number_entities_removed     = 0
+    Statistics.instance.number_services_created     = 0
+    Statistics.instance.number_events_created       = 0
+    Statistics.instance.number_commands_created     = 0
   }
 
   /**
@@ -115,127 +93,12 @@ class SimulationContainer {
   }
 
   /**
-   * Loads entity descriptions from a variety of scripts.
-   * @param scripts The list of script names to load the entity descriptions from.
-   */
-  def loadDescriptionsFrom (List scripts) {
-    scripts.each { loadDescriptionsFrom(it) } 
-  }
-
-  /**
-   * Loads entity descriptions from a script.  The script can be a directory, in which case an attempt is
-   * made to load from children directories.  It can also be any valid name of a resource, in which case that is
-   * used.
-   * @param scriptName A script name to load from. 
-   * @throws FileNotFoundException if the file doesn't exist.
-   */
-  def loadDescriptionsFrom (String scriptName) {
-    Trace.trace("system", "Attempting to load descriptions from ${scriptName}")
-
-    File file = new File(scriptName)
-    def ris = getClass().getResourceAsStream(scriptName)
-
-    if (file.exists() && !file.isDirectory() && file.name.endsWith("groovy")) { // single file, load it.
-      loadDescriptionUsingGroovyScriptEngine(new GroovyScriptEngine(
-                                                   file.absolutePath, new GroovyClassLoader()), 
-                                             file.name)
-    }
-    else if (file.exists()) { // directory of files - load each (note, can recurse if child is dir.)
-      for (File f in file.list()) {
-        loadDescriptionsFrom(scriptName + File.separator + f)
-      }
-    }
-    else if (new File("./${scriptName}").exists()) {  // child of current directory, so load it.
-      loadDescriptionsFrom ("./${scriptName}") 
-    }
-    else if (ris != null) { // valid script name, either file or directory.
-      if (scriptName.endsWith("groovy")) { // assume this is a single file
-        loadDescriptionUsingGroovyScriptEngine(new GroovyScriptEngine(new ScriptEngineConnector(), 
-                                               new GroovyClassLoader()), scriptName)
-      }
-      // NOTE:  the following does not work with jars and throws an exception.
-      else { // treat like a directory.  This will only load immediate resources with .groovy extensions.  No recurse.
-        def br = new BufferedReader(new InputStreamReader(ris))
-        for (def line = br.readLine(); line != null; line = br.readLine()) {
-          if (line.endsWith("groovy")) loadDescriptionsFrom (scriptName + File.separator + line)
-        }
-      }
-    }
-    else { // exhausted all possibilities.
-      throw new FileNotFoundException ("No file or directory named ${scriptName}")
-    }
-  }
-
-  /**
-   * Determines if any of the standard description locations exist. 
-   * Standard locations are entities, services, and events.
-   * @param path The location to search.
-   * @return true if any of the standard locations exist.
-   */
-  def standardLocationsExist (String path) {
-    new File(path + File.separator + "entities").exists() ||
-    new File(path + File.separator + "events").exists() ||
-    new File(path + File.separator + "services").exists()
-  }
-
-  /**
-   * Load from the standard locations.  Standard locations are entities, services, and events.
-   * @param path The location to search.
-   */
-  def loadFromStandardLocations (String path) {
-    if (new File("{path}${File.separator}entities").exists()) loadDescriptionsFrom "${path}{File.separator}entities"
-    if (new File("{path}${File.separator}events").exists())   loadDescriptionsFrom "${path}{File.separator}events"
-    if (new File("{path}${File.separator}services").exists()) loadDescriptionsFrom "${path}{File.separator}services"
-  }
-
-  /**
-   * Loads a descriptions from a resource.  For this to work, all of the entity descriptions in an
-   * individual file must be assigned to individual variables, e.g. myEd = new <type>Description("mytype").
-   * This is due to the way the GroovyScriptEngine passes back variables.
-   * Note that by using the GroovyScriptEngine, it is theoretically possible to change the entity 
-   * description at runtime and see the change, however, this has not been tried.
-   * @param scriptName A resource name to load from.  
-   * @throws FileNotFoundException if the file doesn't exist.
-   */
-  private loadDescriptionUsingGroovyScriptEngine(GroovyScriptEngine gse, String scriptName) {
-    try {
-      Trace.trace("system", "Running script ${scriptName}")
-      Binding b = new Binding()
-      gse.run(scriptName, b)
-      // search the binding for any entity descriptions that got created.
-      for (var in b.variables) {
-        def desc = var.getValue()
-        if (desc instanceof ServiceDescription) {
-          this.addServiceDescription(desc)
-          Trace.trace("system", "Adding service description ${desc.type}")
-          Trace.trace("services", "Adding service description ${desc.type}")
-        }
-        else if (desc instanceof EntityDescription) {
-          Trace.trace("system", "Adding entity description ${desc.type}")
-          Trace.trace("entities", "Adding entity description ${desc.type}")
-          this.addEntityDescription(desc)
-        }
-        else if (desc instanceof EventDescription) {
-          Trace.trace("system", "Adding event description ${desc.type}")
-          Trace.trace("events", "Adding event description ${desc.type}")
-          this.addEventDescription(desc)
-        }
-      }
-    }
-    catch (InstantiationException ie) { /* ignore */ }
-    catch (Exception e) {
-      //e.printStackTrace()
-      log.warn ("Error loading script from ${scriptName}".toString())
-    }
-  }
-
-  /**
    * Adds the entity description for creating entities.
    * @param ed The entity description.
    */
   def addEntityDescription (ed) {
     entityDescriptions[ed.type] = ed
-    statistics.number_entity_descriptions += 1
+    Statistics.instance.number_entity_descriptions += 1
     ed
   }
 
@@ -294,13 +157,13 @@ class SimulationContainer {
    * @return A new entity of the given type.
    */
   def newEntity (entityType, Map attrs = null) throws IllegalArgumentException {
-    def ed = entityDescriptions[entityType]
+    EntityDescription ed = entityDescriptions[entityType]
     if (ed == null) throw new IllegalArgumentException("No entity type ${entityType}.")
 
-    def entity = new ContainedEntity(ed, nextID++, this, attrs)
+    def entity = new ContainedEntity(ed, nextID++, attrs)
     try { entity.init() } catch (MissingMethodException mme) { /* ignore - not implemented */ }
     this.storeEntity(entity)
-    statistics.number_entities_created += 1
+    Statistics.instance.number_entities_created += 1
 
     // N*N, but both are proably small N.
     this.services.keySet().each { svcName ->
@@ -366,7 +229,7 @@ class SimulationContainer {
     def entity = this.entitiesById[entityId]
     if (entity == null) throw new IllegalArgumentException ("Attempting to remove unknown entity with id ${entityId}")
     this.entitiesById.remove(entityId)
-    statistics.number_entities_removed += 1
+    Statistics.instance.number_entities_removed += 1
 
     Trace.trace ("entities", "Removing entity of type ${entity.description.type} and id ${entity.id}")
     entity
@@ -387,7 +250,7 @@ class SimulationContainer {
    */
   def addServiceDescription (sd) {
     serviceDescriptions[sd.type] = sd
-    statistics.number_service_descriptions += 1
+    Statistics.instance.number_service_descriptions += 1
     sd
   }
 
@@ -438,7 +301,7 @@ class SimulationContainer {
         }
       }
     }
-    statistics.number_services_created += 1
+    Statistics.instance.number_services_created += 1
     svc
   }
 
@@ -449,7 +312,7 @@ class SimulationContainer {
    */
   def addEventDescription (ed) {
     eventDescriptions[ed.type] = ed
-    statistics.number_event_descriptions += 1
+    Statistics.instance.number_event_descriptions += 1
     ed
   }
 
@@ -479,7 +342,7 @@ class SimulationContainer {
    */
   def newEvent (type, Map attrs = null) {
     def evt = new Event(this.getEventDescription(type), nextID++, attrs)
-    statistics.number_events_created += 1
+    Statistics.instance.number_events_created += 1
     evt
   }
 
@@ -492,7 +355,7 @@ class SimulationContainer {
    */
   def newCommand (type, tgt, Map attrs = null) {
     def cmd = new Command(this.getEventDescription(type), nextID++, tgt, attrs)
-    statistics.number_commands_created += 1
+    Statistics.instance.number_commands_created += 1
     cmd
   }
 

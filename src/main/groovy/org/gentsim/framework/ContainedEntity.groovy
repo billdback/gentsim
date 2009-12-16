@@ -19,19 +19,18 @@ package org.gentsim.framework
 
 class ContainedEntity extends Entity implements Serializable {
 
-  /** The container of the entity. */
-  private SimulationContainer container
+  /** The simulation owner of the entity. */
+  private Simulation simulation
 
-  /** 
+  /**
    * Creates a new contained entity.
    * @param ed The entity description of the entity.
    * @param id The unique id for the entity.
-   * @param container The simulation container of the entity.
+   * @param simulation The simulation containing the entity.
    * @param attrs Attribute values to override the defaults.
    */
-  ContainedEntity (EntityDescription ed, id, container, Map attrs = null) {
+  ContainedEntity (EntityDescription ed, id, Map attrs = null) {
     super(ed, id, attrs)
-    this.container = container
   }
 
   /*********** wrapper methods to make life easier **********/
@@ -42,23 +41,23 @@ class ContainedEntity extends Entity implements Serializable {
    * @param attrs Attribute values to override the defaults.
    */
   def newEntity (type, Map attrs = null) {
-    container.newEntity(type, attrs)
+    simulation.newEntity(type, attrs)
   }
 
   /**
-   * Destroys the entity, removing it from the container.
+   * Destroys the entity, removing it from the simulation.
    */
   def destroy () {
-    container.removeEntity(this.id)
+    simulation.removeEntity(this.id)
   }
 
   /**
-   * Posts an event to the container.
+   * Posts an event to the simulation.
    * @param event The event to send.
    * @return this to allow for method chaining
    */
   def sendEvent (Event event) {
-    container.sendEvent(event)
+    simulation.sendEvent(event)
     this
   }
 
@@ -69,7 +68,7 @@ class ContainedEntity extends Entity implements Serializable {
    * @return The new event.
    */
   def newEvent (type, Map attrs = null) {
-    container.newEvent(type, attrs)
+    simulation.newEvent(type, attrs)
   }
 
   /**
@@ -80,7 +79,7 @@ class ContainedEntity extends Entity implements Serializable {
    * @return The command that was creatcd.
    */
   def newCommand (type, tgt, Map attrs = null) {
-    container.newCommand(type, tgt, attrs)
+    simulation.newCommand(type, tgt, attrs)
   }
 
 }

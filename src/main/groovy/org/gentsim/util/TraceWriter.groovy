@@ -15,25 +15,19 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.util.trace
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+package org.gentsim.util
 
 /**
- * Traces messages to Log4J.
+ * Interface for specific tracers of messages.  A tracer is simply something that allows users to trace messages
+ * to some output for debugging, etc.
  */
-class Log4JTraceWriter implements TraceWriter {
-
-  /** Default logger for gentsim. */
-  private static Log log = LogFactory.getLog("org.gentsim.log")
+public interface TraceWriter {
 
   /**
    * Send a trace message.
    * @param t The trace to send to.
    * @param msg The message to send to.
    */
-  def trace (String t, String msg) {
-    log.info("[${t}] ${msg}")
-  }
+  def trace (String t, String msg)
+
 }
