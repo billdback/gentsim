@@ -19,8 +19,8 @@ package org.gentsim.framework
 
 class ContainedEntity extends Entity implements Serializable {
 
-  /** The simulation owner of the entity. */
-  private Simulation simulation
+  /** The owner of the entity. */
+  private SimulationContainer owner
 
   /**
    * Creates a new contained entity.
@@ -29,8 +29,9 @@ class ContainedEntity extends Entity implements Serializable {
    * @param simulation The simulation containing the entity.
    * @param attrs Attribute values to override the defaults.
    */
-  ContainedEntity (EntityDescription ed, id, Map attrs = null) {
+  ContainedEntity (EntityDescription ed, id, owner, Map attrs = null) {
     super(ed, id, attrs)
+    this.owner = owner
   }
 
   /*********** wrapper methods to make life easier **********/
@@ -41,14 +42,14 @@ class ContainedEntity extends Entity implements Serializable {
    * @param attrs Attribute values to override the defaults.
    */
   def newEntity (type, Map attrs = null) {
-    simulation.newEntity(type, attrs)
+    owner.newEntity(type, attrs)
   }
 
   /**
    * Destroys the entity, removing it from the simulation.
    */
   def destroy () {
-    simulation.removeEntity(this.id)
+    owner.removeEntity(this.id)
   }
 
   /**
@@ -57,7 +58,7 @@ class ContainedEntity extends Entity implements Serializable {
    * @return this to allow for method chaining
    */
   def sendEvent (Event event) {
-    simulation.sendEvent(event)
+    owner.sendEvent(event)
     this
   }
 
@@ -68,7 +69,7 @@ class ContainedEntity extends Entity implements Serializable {
    * @return The new event.
    */
   def newEvent (type, Map attrs = null) {
-    simulation.newEvent(type, attrs)
+    owner.newEvent(type, attrs)
   }
 
   /**
@@ -79,7 +80,7 @@ class ContainedEntity extends Entity implements Serializable {
    * @return The command that was creatcd.
    */
   def newCommand (type, tgt, Map attrs = null) {
-    simulation.newCommand(type, tgt, attrs)
+    owner.newCommand(type, tgt, attrs)
   }
 
 }

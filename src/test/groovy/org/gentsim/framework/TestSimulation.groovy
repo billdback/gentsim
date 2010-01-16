@@ -17,14 +17,11 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 import org.gentsim.util.Statistics
+import org.gentsim.util.Trace
 
-@Speck
-@RunWith(Sputnik)
-class TestSimulation {
+class TestSimulation extends Specification {
 
   def s = new Simulation()
 
@@ -32,10 +29,10 @@ class TestSimulation {
     setup:
 
     expect:
-      s.container.getEventDescription("time-update")
-      s.container.getEventDescription("entity-created")
-      s.container.getEventDescription("entity-destroyed")
-      s.container.getEventDescription("entity-state-changed")
+      s.getEventDescription("time-update")
+      s.getEventDescription("entity-created")
+      s.getEventDescription("entity-destroyed")
+      s.getEventDescription("entity-state-changed")
   }
 
   def "Test setting the cycle limit"() {
@@ -57,7 +54,7 @@ class TestSimulation {
       entd.shutdownCalled = false
       entd.handleEvent ("system.status.startup") { startupCalled = true }
       entd.handleEvent ("system.status.shutdown") { shutdownCalled = true }
-      s.container.addEntityDescription(entd)
+      s.addEntityDescription(entd)
       def ent = s.newEntity("system-msg-handler")
 
     when:
@@ -78,7 +75,7 @@ class TestSimulation {
       entd.shutdownCalled = false
       entd.handleEvent ("system.status.startup") { startupCalled = true }
       entd.handleEvent ("system.status.shutdown") { shutdownCalled = true }
-      s.container.addEntityDescription(entd)
+      s.addEntityDescription(entd)
       def ent = s.newEntity("system-msg-handler")
 
     when:
@@ -96,7 +93,7 @@ class TestSimulation {
       def ed1 = new EntityDescription("entity1")
       ed1.initCalled = false
       ed1.method ("init") { initCalled = true }
-      s.container.addEntityDescription(ed1)
+      s.addEntityDescription(ed1)
 
     when:
       def e1 = s.newEntity("entity1")
@@ -105,16 +102,16 @@ class TestSimulation {
       e1.initCalled == true
   }
 
-  def "Test creating and destroying enities" () {
+  def "Test creating and destroying entities" () {
     setup:
 
       def ed1 = new EntityDescription("entity1")
       ed1.attribute "called", 0
-      ed1.handleEntityCreated("entity2") { entity -> called += 1 }
-      ed1.handleEntityDestroyed("entity2") { entity -> called -= 1 }
-      s.container.addEntityDescription(ed1)
+      ed1.handleEntityCreated("entity2") { entity -> println "created"; called += 1 }
+      ed1.handleEntityDestroyed("entity2") { entity -> println "destroyed"; called -= 1 }
+      s.addEntityDescription(ed1)
       def ed2 = new EntityDescription("entity2")
-      s.container.addEntityDescription(ed2)
+      s.addEntityDescription(ed2)
 
     when:
       def e1 = s.newEntity("entity1")
@@ -143,12 +140,12 @@ class TestSimulation {
       ed3.attribute "called", 0
       ed3.handleEntityCreated("entity4") { entity -> called += 1 }
       ed3.handleEntityDestroyed("entity4") { entity -> called -= 1 }
-      s.container.addEntityDescription(ed3)
+      s.addEntityDescription(ed3)
 
       def ed4 = new EntityDescription("entity4")
       ed4.attribute "called", 0
       ed4.handleEntityStateChanged ("entity3", "called") { entity -> called += 1 }
-      s.container.addEntityDescription(ed4)
+      s.addEntityDescription(ed4)
 
     when:
       def e3 = s.newEntity("entity3")
@@ -174,9 +171,9 @@ class TestSimulation {
       def ed1 = new EntityDescription("entity1")
       ed1.attribute "called", 0
       ed1.handleEvent("event1") { event -> called += 1 }
-      s.container.addEntityDescription(ed1)
-      s.container.addEventDescription(new EventDescription("event1"))
-      s.container.addEventDescription(new EventDescription("event2"))
+      s.addEntityDescription(ed1)
+      s.addEventDescription(new EventDescription("event1"))
+      s.addEventDescription(new EventDescription("event2"))
 
     when:
       def e1 = s.newEntity("entity1")
@@ -199,12 +196,80 @@ class TestSimulation {
 
   }
 
+  def "Test sending events in order"() {
+    setup:
+      def evtd1 = new EventDescription("user1")
+      def evtd2 = new EventDescription("user2")
+      s.addEventDescription(evtd1)
+      s.addEventDescription(evtd2)
+
+      def entd = new EntityDescription("allhandler")
+      entd.events = []
+      entd.handleEvent(".*") { event -> events << event.type; println event.type }
+      s.addEntityDescription(entd)
+
+      s.setEventOrder(["user1", "user2"])
+
+      def expectedEventOrder = ["system.control.pause", "system.status.startup", "entity-created", "user1", "user2"]
+
+      def ent = s.newEntity("allhandler")
+      s.sendEvent(s.newEvent("user2"))
+      s.sendEvent(s.newEvent("user1"))
+      s.sendEvent(s.newEvent("system.control.pause"))
+      s.sendEvent(s.newEvent("system.status.startup"))
+      s.cycle()
+    expect:
+      ent.events == expectedEventOrder
+  }
+
+  def "Test setting time step"() {
+    setup:
+      Simulation sim = new Simulation()
+    expect:
+      !sim.timeStepped
+
+    when:
+      sim.timeStepped()
+    then:
+      sim.timeStepped
+  }
+
+  def "Test creating with time step on"() {
+    setup:
+      Simulation sim = new Simulation(true)
+    expect:
+      sim.timeStepped
+  }
+
+  def "Test using time step"() {
+    setup:
+      s.timeStepped()
+
+      def entd = new EntityDescription ("entity")
+      entd.attribute "time_update_called"
+      entd.attribute "time", 0
+      entd.handleTimeUpdate { t -> time = t; time_update_called = new Date() }
+      entd.attribute "event_called"
+      entd.handleEvent ("event") { evt -> event_called = new Date() }
+      s.addEntityDescription(entd)
+      def entity = s.newEntity("entity")
+
+      s.addEventDescription (new EventDescription("event"))
+
+    when:
+      (1..10).each {s.sendEvent(s.newEvent("event"))}
+      s.cycle()
+    then:
+      entity.time == 1
+      entity.time_update_called < entity.event_called
+  }
+
   def "Test statistics" () {
     setup:
       Simulation s = new Simulation()
       def ed = new EntityDescription("some-entity")
       ed.handleEvent ("new-event") {}
-      s.container.addEntityDescription(ed)
+      s.addEntityDescription(ed)
 
     when:
       s.newEntity ("some-entity")

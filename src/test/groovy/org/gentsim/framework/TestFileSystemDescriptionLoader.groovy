@@ -17,17 +17,15 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.junit.runner.RunWith
 import spock.lang.*
 
-@Speck
-@RunWith(Sputnik)
-class TestFileSystemDescriptionLoader {
+import org.gentsim.util.Trace
+
+class TestFileSystemDescriptionLoader extends Specification {
 
   def "Test loading a description from a named file" () {
     setup:
       FileSystemDescriptionLoader fsdl = new FileSystemDescriptionLoader()
-println "file == ${new File('.').absolutePath}"
       // Assumes running test from the root location.
       SimulationContainer sc = new SimulationContainer()
       fsdl.loadDescriptionsFromLocation "src/test/resources/entities/Animals.groovy", sc

@@ -17,13 +17,9 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 
-@Speck
-@RunWith(Sputnik)
-class TestService {
+class TestService extends Specification {
   
   def "Create a base service"() {
     setup:

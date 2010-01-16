@@ -17,13 +17,9 @@ his file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 
-@Speck
-@RunWith(Sputnik)
-class TestScriptEngineConnector {
+class TestScriptEngineConnector extends Specification {
 
   def "Test finding a resource"() {
     setup:

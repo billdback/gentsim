@@ -17,12 +17,9 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
-import org.junit.runner.RunWith
 import spock.lang.*
 
-@Speck
-@RunWith(Sputnik)
-class TestJMSTraceWriter {
+class TestJMSTraceWriter extends Specification {
 
   def "Test creating JMS trace writer"() {
     

@@ -25,16 +25,19 @@ import org.gentsim.util.Statistics
  * The simulation class is the main driver for the simulation, combining the container with the 
  * execution.
  */
-class Simulation {
+class Simulation extends SimulationContainer {
 
   /** flag to stop the simulation.  */
   protected final shouldStop = false
 
-  /** event queue for events. */
-  protected final eventQueue = new TimeEventQueue()
+  /* Event queues store events for processing.  System event queues go first, then user defined, then all other events. */
 
-  /** Simulation container for holding entities and descriptions. */
-  protected final container = new SimulationContainer()
+  /** event queues for system events */
+  protected final EventQueueList systemEventQueues = new EventQueueList()
+  /** event queues for user defined events */
+  protected final EventQueueList userEventQueues = new EventQueueList()
+  /** event queue for all events not captured in other queues */
+  protected final TimeEventQueue allOtherEventsQueue = new TimeEventQueue()
 
   /** Description loader to use to load descriptions. */
   protected final DescriptionLoader descriptionLoader = new FileSystemDescriptionLoader()
@@ -45,40 +48,67 @@ class Simulation {
   /** Indicates that the simulation is paused.  */
   protected boolean paused = false
 
+  /** Determines if this is a time stepped simulation or not.  If true it is. */
+  private boolean timeStepped = false
+
+  /** Current simulation time. */
+  private int currentTime = 1
+
   /**
    * Creates a new time stepped simulation, loading descriptions from the given location.
+   * @param timeStepped Flag to make this time stepped if true.
    */
-  Simulation () {
-    super()
-    setupSimulation()
+  Simulation (timeStepped = false) {
+    setupSimulation(timeStepped)
   }
 
   /**
    * Creates a new simulation, loading descriptions from the given location.
    * @param location The location of the scripts to load.
+   * @param timeStepped Flag to make this time stepped if true.
    */
-  Simulation (String location) {
-    super(location)
-    setupSimulation()
+  Simulation (String location, timeStepped = false) {
+    setupSimulation(false)
+    this.descriptionLoader.loadDescriptionsFromLocation(location, this)
   }
 
   /**
    * Creates a new simulation, loading desriptions from multiple locations.
    * @param locations A list of locations to load from.
+   * @param timeStepped Flag to make this time stepped if true.
    */
-  Simulation (List locations) {
-    super(locations)
-    setupSimulation()
+  Simulation (List locations, timeStepped = false) {
+    setupSimulation(timeStepped)
+    this.descriptionLoader.loadDescriptionsFromLocations(locations, this)
   }
 
   /**
    * Performs common actions needed to initialize the simulation.
    */
-  private setupSimulation() {
+  private setupSimulation(timeStepped = false) {
     // TODO:  Make this configurable.
     Trace.addTraceWriter(new Log4JTraceWriter())
     addStatistics()
+
+    // Set up the initial system queues.
+    this.systemEventQueues.addEventQueue("system.control.*", new TimeEventQueue())
+    this.systemEventQueues.addEventQueue("system.status.*", new TimeEventQueue())
+    this.systemEventQueues.addEventQueue("entity-.*", new TimeEventQueue())
+
     loadDefaultDescriptions()
+
+    if (timeStepped) this.timeStepped()
+  }
+
+  /**
+   * Sets the order of user defined events.  These are handled after system events.
+   * All other events are handled after these.
+   * @param eventTypes An ordered list of event types to handle.
+   */
+  def setEventOrder (List eventTypes) {
+    eventTypes.each { et ->
+      this.userEventQueues.addEventQueue(et, new TimeEventQueue())
+    }
   }
 
   /**
@@ -97,7 +127,7 @@ class Simulation {
         "/framework/events/SystemStatusShutdown.groovy",
         "/framework/events/SystemStatusStartup.groovy",
         "/framework/events/TimeUpdateEvent.groovy"
-      ], this.container
+      ], this
     )
   }
 
@@ -111,13 +141,22 @@ class Simulation {
   }
 
   /**
+   * Sets the simulation to be time stepped. 
+   */
+  def timeStepped() {
+    this.timeStepped = true
+    // TODO check to make sure the time for all queues remains in sync.
+    this.systemEventQueues.addEventQueue("time-update", new TimeUpdateEventQueue(newEvent("time-update")))
+  }
+  
+  /**
    * Continues to run the simulation until told to stop.
    */
   def run() {
     Trace.trace("system", "starting the simulation")
     Statistics.instance.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(container.newEvent("system.status.startup"))
+      sendEventToEntities(newEvent("system.status.startup"))
       while (!this.shouldStop) {
         if (paused) Thread.sleep 100
         else cycle()
@@ -133,7 +172,7 @@ class Simulation {
     Trace.trace("system", "starting the simulation for ${nbrCycles} cycles")
     Statistics.instance.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(container.newEvent("system.status.startup"))
+      sendEventToEntities(newEvent("system.status.startup"))
       int cnt = 0
       while (cnt < nbrCycles && !this.shouldStop) {
         if (paused) Thread.sleep 100
@@ -153,7 +192,10 @@ class Simulation {
   def cycle () {
     def start_time = System.currentTimeMillis()
     Statistics.instance.number_cycles += 1
-    processCurrentEvents()
+
+    processCurrentEvents()  // TODO does this work for time stepped events?  I.e. could there be a jump?
+    this.currentTime++
+
     def stop_time = System.currentTimeMillis()
     if ((stop_time - start_time) < cycleLength) Thread.sleep (cycleLength - (stop_time - start_time))
   }
@@ -164,7 +206,11 @@ class Simulation {
    * @return this to allow for method chaining.
    */
   def sendEvent (Event event) {
-    this.eventQueue << event
+    // Tries each event queue by priority.
+    if (!this.systemEventQueues.addEvent(event))
+      if (!this.userEventQueues.addEvent(event))
+        this.allOtherEventsQueue.add(event)
+
     // check for system commands that take place immediately.
     switch (event.description.type) {
       case "system.control.shutdown":
@@ -185,10 +231,27 @@ class Simulation {
    */
   def processCurrentEvents () {
     // TODO figure out how to aggregate changes to the entity to reduce the number of messages being sent.
+    // this could be done by event changes to a map based on the entity and update the changes.  Then
+    // at the end of the cycle send the entity changed events.
     //StopWatch watch = new LoggingStopWatch("Simulation.processCurrentEvents")
-    this.eventQueue.nextTimeEvents.each { evt ->
-      sendEventToEntities (evt)
+
+    def sendEventsFromQueue = { queue ->
+      queue.getEventsForTime(currentTime).each { evt ->
+        sendEventToEntities(evt)
+      }
     }
+
+    // Send all of the system events first.
+    this.systemEventQueues.eachQueue { queue ->
+      sendEventsFromQueue(queue)
+    }
+    // Send the user defined events next.
+    this.userEventQueues.eachQueue { queue ->
+      sendEventsFromQueue(queue)
+    }
+    // Send any remaining events in any order.
+    sendEventsFromQueue(this.allOtherEventsQueue)
+    
     //watch.stop()
   }
 
@@ -200,7 +263,7 @@ class Simulation {
     Trace.trace("events", "Sending ${event.type} ${event.attributes} to entities at time ${event.time}")
     //StopWatch watch = new LoggingStopWatch("Simulation.sendEventToEntities")
     def old_attributes = [:]
-    this.container.getEntitiesWhoHandleEvent (event).each { ent ->
+    this.getEntitiesWhoHandleEvent (event).each { ent ->
       old_attributes.clear()
       old_attributes.putAll(ent.attributes)
       ent.handleEvent(event)
@@ -229,8 +292,7 @@ class Simulation {
    * @return A new entity of the given type.
    */
   def newEntity (entityType, Map attrs = null) throws IllegalArgumentException {
-    def entity = this.container.newEntity(entityType, attrs)
-    entity.simulation = this
+    def entity = super.newEntity(entityType, attrs)
 
     // Sends event to entities who are interested in this new entity
     def evt = this.newEvent("entity-created", ["entity_type": entity.type, "entity": entity])
@@ -245,46 +307,13 @@ class Simulation {
    * @return The entity that was removed or null if it didn't exist.
    */
   def removeEntity (int entityId) {
-    def entity = this.container.removeEntity(entityId)
+    def entity = super.removeEntity(entityId)
 
     // Sends event to entities who are interested in this new entity
-    def evt = this.container.newEvent("entity-destroyed", ["entity_type": entity.type, "entity": entity])
+    def evt = this.newEvent("entity-destroyed", ["entity_type": entity.type, "entity": entity])
     sendEvent(evt)
 
     entity 
-  }
-
-  /**
-   * Creates a service and stores in the list of services.
-   * @param type The type of service to create.
-   * @return The service that was created.
-   * TODO Use the @Delegate when 1.7 is released.
-   */
-  def newService (type) {
-     this.container.newService(type)
-  }
-
-  /**
-   * Creates a event.
-   * @param type The type of the event.
-   * @param attrs Attributes to set on the event.
-   * @return The event that was created.
-   * TODO Use the @Delegate when 1.7 is released.
-   */
-  def newEvent (type, Map attrs = null) {
-    this.container.newEvent(type, attrs)
-  }
-
-  /**
-   * Creates a command.
-   * @param type The type of command to create.
-   * @param tgt The target of the command.
-   * @param attrs Attributes to set on the command.
-   * @return The command that was creatcd.
-   * TODO Use the @Delegate when 1.7 is released.
-   */
-  def newCommand (type, tgt, Map attrs = null) {
-    this.container.newCommand(type, tgt, attrs)
   }
 
   /*
@@ -295,7 +324,7 @@ class Simulation {
     Statistics.instance.end_time = new Date().getTime()
     Statistics.instance.elapsed_time = Statistics.instance.end_time - Statistics.instance.start_time
     Statistics.instance.printStatistics()
-    sendEventToEntities(container.newEvent("system.status.shutdown"))
+    sendEventToEntities(newEvent("system.status.shutdown"))
     this.shouldStop = true
   }
 

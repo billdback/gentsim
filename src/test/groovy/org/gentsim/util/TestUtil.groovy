@@ -17,13 +17,9 @@ This file is part of gentsim.
 */
 package org.gentsim.util
 
-import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 
-@Speck
-@RunWith(Sputnik)
-class TestUtil {
+class TestUtil extends Specification {
 
   def "Test converting a file to a string"() {
     when:

@@ -19,6 +19,7 @@ package org.gentsim.framework
 
 /**
  * Defines an event queue based on time.
+ * @author Bill Back
  */
 class TimeEventQueue {
 
@@ -32,7 +33,7 @@ class TimeEventQueue {
    * prevents having old events.  Furthermore, events can be added without a time and they will automatically
    * be set to the next time.
    */
-  int currentTime = 0
+  protected int currentTime = 0
 
   /**
    * Adds an event to the queue.  
@@ -40,7 +41,6 @@ class TimeEventQueue {
    */
   def add (Event event) {
     if (! event.time) event.time = currentTime + 1 // this could be expensive.
-//    println "adding event ${event.type} for time ${event.time}"
     if (event.time <= currentTime) throw new IllegalArgumentException ("Events must be scheduled in the future.")
 
     def list = this.eventQueue.get(event.time)
@@ -62,7 +62,7 @@ class TimeEventQueue {
   }
 
   /** Current list of events in the queue. */
-  def currentList = []
+  private currentList = []
 
   /**
    * Returns the next event or a null if there are no more events.
@@ -101,6 +101,16 @@ class TimeEventQueue {
   }
 
   /**
+   * Returns the events for the given time, removing them from the queue.
+   * @return A list of events for the given time, or null.
+   */
+  def getEventsForTime (int t) {
+    this.currentTime = t
+    def q = this.eventQueue.remove(t)
+    (q == null) ? [] : q
+  }
+
+  /**
    * Returns the current time for the queue.
    * @return The current time for the queue.
    */
@@ -118,6 +128,18 @@ class TimeEventQueue {
     catch (NoSuchElementException nsee) {
       return -1
     }
+  }
+
+  /**
+   * Returns the total number of events in the queue. 
+   */
+  int size() {
+    // There is probably a groovier way to do this.
+    int size = 0
+    eventQueue.values().every() { v ->
+      size += v.size()
+    }
+    size
   }
 
 }

@@ -17,14 +17,10 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 import org.gentsim.util.Statistics
 
-@Speck
-@RunWith(Sputnik)
-class TestSimulationContainer {
+class TestSimulationContainer extends Specification {
 
   def "Test getting entity descriptions" () {
     setup:

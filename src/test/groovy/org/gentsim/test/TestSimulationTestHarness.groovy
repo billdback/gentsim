@@ -2,13 +2,9 @@ package org.gentsim.test
 
 import org.gentsim.framework.*
 
-import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 
-@Speck
-@RunWith(Sputnik)
-class TestSimulationTestHarness {
+class TestSimulationTestHarness extends Specification {
 
   // assumes this is run from the gentsim home.
   @Shared sth = new SimulationTestHarness(["/entities",

@@ -160,7 +160,7 @@ class SimulationContainer {
     EntityDescription ed = entityDescriptions[entityType]
     if (ed == null) throw new IllegalArgumentException("No entity type ${entityType}.")
 
-    def entity = new ContainedEntity(ed, nextID++, attrs)
+    def entity = new ContainedEntity(ed, nextID++, this, attrs)
     try { entity.init() } catch (MissingMethodException mme) { /* ignore - not implemented */ }
     this.storeEntity(entity)
     Statistics.instance.number_entities_created += 1

@@ -17,13 +17,10 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
-import org.junit.runner.RunWith
 import spock.lang.*
-import static spock.lang.Predef.*
 
-@Speck
-@RunWith(Sputnik)
-class TestLogicalTime {
+class TestLogicalTime  extends Specification {
+
   def "Create logical time" () {
     setup:
       def lt = new LogicalTime()

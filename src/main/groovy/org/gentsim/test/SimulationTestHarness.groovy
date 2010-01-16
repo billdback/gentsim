@@ -59,11 +59,12 @@ class SimulationTestHarness extends Simulation {
    * @return A new entity of the given type.
    */
   def newEntity (entityType, Map attrs = null) throws IllegalArgumentException {
-    def ed = super.entityDescriptions[entityType]
+    def ed = super.getEntityDescription(entityType)
     if (ed == null) throw new IllegalArgumentException("No entity type ${entityType}.")
 
-    def entity = new ContainedEntity(ed, nextID++, this, attrs)
-    storeEntity(entity)
+    ContainedEntity entity = super.newEntity(entityType, attrs)
+    entity.owner = this
+    this.storeEntity(entity)
     entity
   }
 
@@ -73,8 +74,8 @@ class SimulationTestHarness extends Simulation {
    * @return The service that was created.
    */
   def newService (type) {
-    def svc = new Service(serviceDescriptions[type])
-    services[type] = svc
+    def svc = new Service(this.getServiceDescription(type))
+    this.services[type] = svc
     svc
   }
 

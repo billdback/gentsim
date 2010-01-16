@@ -19,11 +19,8 @@ package org.gentsim.util
 
 
 import spock.lang.*
-import org.junit.runner.RunWith
 
-@Speck
-@RunWith(Sputnik)
-class TestTrace {
+class TestTrace extends Specification {
 
   // This is needed because Trace is all static and doesn't get cleared out between tests.
   // There's probably a better answer, but this works for now.

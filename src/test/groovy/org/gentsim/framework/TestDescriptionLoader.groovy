@@ -18,11 +18,8 @@ This file is part of gentsim.
 package org.gentsim.framework
 
 import spock.lang.*
-import org.junit.runner.RunWith
 
-@Speck
-@RunWith(Sputnik)
-class TestDescriptionLoader {
+class TestDescriptionLoader extends Specification {
 
   def "Test loading descriptions from a list"() {
     setup:
