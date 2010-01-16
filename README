@@ -9,4 +9,4 @@ Entity based simulations are a special class of simulation that models individua
 
 The current version of gentsim is a very early version that allows for the construction of simple entity simulations with no order of interactions, no inheritance, etc. Such features and additional tools will be forthcoming in future versions and driven by simulation development. The end goal is to have a robust framework and DSL for entity simulations that allow for much more use of simulation in studying these systems.
 
-Note that gentsim requries the use of Groovy 1.6.5 or later.  It will not work with earlier versions.
+Note that gentsim requries the use of Groovy 1.7.0 or later.  It will not work with earlier versions.
