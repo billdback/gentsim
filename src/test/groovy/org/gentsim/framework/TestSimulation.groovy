@@ -136,6 +136,7 @@ class TestSimulation extends Specification {
 
   def "Test updating enities and changing state" () {
     setup:
+
       def ed3 = new EntityDescription("entity3")
       ed3.attribute "called", 0
       ed3.handleEntityCreated("entity4") { entity -> called += 1 }
@@ -148,22 +149,24 @@ class TestSimulation extends Specification {
       s.addEntityDescription(ed4)
 
     when:
+
       def e3 = s.newEntity("entity3")
       def e4_1 = s.newEntity("entity4")
       def e4_2 = s.newEntity("entity4")
+
       s.cycle()
-      s.cycle() // needed to send all events
+      s.cycle() // needed to cause updates and send all events
     then:
       e3.called == 2
-      e4_1.called == 2
+      e4_1.called == 1
 
     when:
       s.removeEntity(e4_1.id)
       s.cycle()
-      s.cycle() // needed to send all events
+      s.cycle() // needed to cause updates and send all events
     then:
       e3.called == 1
-      e4_2.called == 3
+      e4_2.called == 2
   }
 
   def "Test processing events" () {
@@ -282,6 +285,28 @@ class TestSimulation extends Specification {
       Statistics.instance.elapsed_time > 0
       Statistics.instance.number_cycles == 1000
       Statistics.instance.number_events_sent == 1
+  }
+
+  def "Test entity state change messages" () {
+    setup:
+      // multiple events to show only one is received.
+      def ent1 = new Entity(new EntityDescription("ent1"), 1)
+      def entd = new EntityDescription ("entity")
+      entd.ent_change_called = 0
+      entd.handleEntityStateChanged("ent1", ".*") { ent -> ent_change_called++ }
+      s.addEntityDescription(entd)
+      def entity = s.newEntity("entity")
+
+    when:
+      s.sendEvent(s.newEvent("entity-state-changed", ["entity_type" : "ent1", "entity" : ent1, "changed_attributes" : ["attr1"]]))
+      s.sendEvent(s.newEvent("entity-state-changed", ["entity_type" : "ent1", "entity" : ent1, "changed_attributes" : ["attr1"]]))
+      s.sendEvent(s.newEvent("entity-state-changed", ["entity_type" : "ent1", "entity" : ent1, "changed_attributes" : ["attr1", "attr2"]]))
+      s.sendEvent(s.newEvent("entity-state-changed", ["entity_type" : "ent1", "entity" : ent1, "changed_attributes" : ["attr3"]]))
+      s.cycle(); s.cycle() // have to cycle twice because of when the event gets added.
+    then:
+      entity.ent_change_called == 1
+
+
   }
 
 }

@@ -145,7 +145,6 @@ class Simulation extends SimulationContainer {
    */
   def timeStepped() {
     this.timeStepped = true
-    // TODO check to make sure the time for all queues remains in sync.
     this.systemEventQueues.addEventQueue("time-update", new TimeUpdateEventQueue(newEvent("time-update")))
   }
   
@@ -193,7 +192,9 @@ class Simulation extends SimulationContainer {
     def start_time = System.currentTimeMillis()
     Statistics.instance.number_cycles += 1
 
-    processCurrentEvents()  // TODO does this work for time stepped events?  I.e. could there be a jump?
+    processCurrentEvents()
+    sendEntityUpdates()
+    
     this.currentTime++
 
     def stop_time = System.currentTimeMillis()
@@ -206,24 +207,53 @@ class Simulation extends SimulationContainer {
    * @return this to allow for method chaining.
    */
   def sendEvent (Event event) {
-    // Tries each event queue by priority.
-    if (!this.systemEventQueues.addEvent(event))
-      if (!this.userEventQueues.addEvent(event))
-        this.allOtherEventsQueue.add(event)
 
-    // check for system commands that take place immediately.
-    switch (event.description.type) {
-      case "system.control.shutdown":
-        stop()
-        break
-      case "system.control.start":
-        this.paused = false
-        break
-      case "system.control.pause":
-        this.paused = true
-        break
+    // entity state change events are buffered to only have one update per cycle.
+    if (event.type == "entity-state-changed") {
+      bufferEntityChangeEvent(event)
+    }
+    else {
+      // Tries each event queue by priority.
+      if (!this.systemEventQueues.addEvent(event))
+        if (!this.userEventQueues.addEvent(event))
+          this.allOtherEventsQueue.add(event)
+
+      // check for system commands that take place immediately.
+      switch (event.description.type) {
+        case "system.control.shutdown":
+          stop()
+          break
+        case "system.control.start":
+          this.paused = false
+          break
+        case "system.control.pause":
+          this.paused = true
+          break
+      }
     }
     this
+  }
+
+  /** Keeps track of the entity change events. */
+  private entityChangeEvents = [:]
+
+  /**
+   * Keeps track of all the entity change events so that there is only one for each entity.
+   * @param event An entity change event.
+   */
+  private bufferEntityChangeEvent(event) {
+    def ece = entityChangeEvents[event.entity.id]
+    if (ece != null) {  // previous state change, so combine all of the updates into a single set.  The most recent value counts.
+      event.changed_attributes.addAll(ece.changed_attributes)
+      event.changed_attributes = event.changed_attributes.unique()
+
+    }
+    entityChangeEvents[event.entity.id] = event
+  }
+
+  def sendEntityUpdates () {
+    entityChangeEvents.each { id, evt -> this.systemEventQueues.addEvent (evt) }
+    entityChangeEvents.clear()
   }
 
   /**

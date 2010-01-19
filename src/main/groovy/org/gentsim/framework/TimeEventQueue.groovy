@@ -17,6 +17,8 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
+import org.gentsim.util.Trace
+
 /**
  * Defines an event queue based on time.
  * @author Bill Back

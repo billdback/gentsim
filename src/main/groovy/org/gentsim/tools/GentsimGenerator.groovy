@@ -129,7 +129,7 @@ class GentsimGenerator {
 // create the simulation and specify location of entities, etc.
 def ${vname} = new Simulation(["entities", "events", "services"])
 // NOTE:  Use the followng for a time stepped simulation.
-// def ${vname} = new TimeSteppedSimulation(["entities", "events", "services"])
+// def ${vname} = new Simulation(["entities", "events", "services"], true)
 
 // Create entities and services, setting attribute values.
 
