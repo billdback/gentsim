@@ -6,6 +6,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <groupId>org.gentsim</groupId>
   <artifactId>gentsim</artifactId>
   <name>GEntSim Project</name>
@@ -17,6 +21,7 @@
       <name>Spock Testing Framework</name>
       <url>http://m2repo.spockframework.org/snapshots</url>
     </repository>
+
   </repositories>
 
   <dependencies>
@@ -24,26 +29,28 @@
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-all</artifactId>
-      <version>1.7.0</version>
+      <version>1.7.3</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.gmaven</groupId>
       <artifactId>gmaven-mojo</artifactId>
-      <version>1.1</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.gmaven.runtime</groupId>
       <artifactId>gmaven-runtime-1.7</artifactId>
-      <version>1.1</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
       <groupId>org.spockframework</groupId>
       <artifactId>spock-maven</artifactId>
-      <!-- <version>0.3</version> -->
       <version>0.4-groovy-1.7-SNAPSHOT</version>
+      <!--
+      <version>0.4-groovy-1.6-SNAPSHOT</version>
+      -->
       <scope>test</scope>
     </dependency>
 
@@ -75,7 +82,13 @@
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>activemq-core</artifactId>
-      <version>5.3.0</version>
+      <version>5.3.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.jms</groupId>
+      <artifactId>jms</artifactId>
+      <version>1.1</version>
     </dependency>
 
   </dependencies>
@@ -85,7 +98,11 @@
       <plugin>
         <groupId>org.codehaus.gmaven</groupId>
         <artifactId>gmaven-plugin</artifactId>
-        <version>1.1</version>
+        <version>1.2</version>
+        <configuration>
+          <providerSelection>1.7</providerSelection>
+          <source></source>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -100,6 +117,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.1</version>
         <configuration>
           <source>1.5</source>
           <target>1.5</target>

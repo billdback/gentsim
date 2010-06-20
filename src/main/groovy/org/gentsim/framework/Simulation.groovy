@@ -92,6 +92,7 @@ class Simulation extends SimulationContainer {
 
     // Set up the initial system queues.
     this.systemEventQueues.addEventQueue("system.control.*", new TimeEventQueue())
+    this.systemEventQueues.addEventQueue("system.status.status", new TimeEventQueue())
     this.systemEventQueues.addEventQueue("system.status.*", new TimeEventQueue())
     this.systemEventQueues.addEventQueue("entity-.*", new TimeEventQueue())
 
@@ -126,6 +127,7 @@ class Simulation extends SimulationContainer {
         "/framework/events/SystemControlPause.groovy",
         "/framework/events/SystemStatusShutdown.groovy",
         "/framework/events/SystemStatusStartup.groovy",
+        "/framework/events/SystemStatusStatus.groovy",
         "/framework/events/TimeUpdateEvent.groovy"
       ], this
     )
@@ -192,13 +194,30 @@ class Simulation extends SimulationContainer {
     def start_time = System.currentTimeMillis()
     Statistics.instance.number_cycles += 1
 
+    Trace.trace "system", "system time: ${this.currentTime}"
     processCurrentEvents()
     sendEntityUpdates()
+    sendSystemStatusEvent()
     
     this.currentTime++
 
     def stop_time = System.currentTimeMillis()
     if ((stop_time - start_time) < cycleLength) Thread.sleep (cycleLength - (stop_time - start_time))
+  }
+
+  /**
+   * Sends a system status update event.  This is always sent at the end of the current cycle.
+   */
+  def sendSystemStatusEvent() {
+
+    def statusEvent = newEvent("system.status.status", [
+            "number_entities" : this.numberEntities,
+            "number_services" : this.numberServices,
+            "cycle_length"    : this.cycleLength,
+            "timestep"        : this.timeStepped
+    ])
+    statusEvent.time = currentTime
+    this.sendEventToEntities(statusEvent)
   }
 
   /**
@@ -355,6 +374,7 @@ class Simulation extends SimulationContainer {
     Statistics.instance.elapsed_time = Statistics.instance.end_time - Statistics.instance.start_time
     Statistics.instance.printStatistics()
     sendEventToEntities(newEvent("system.status.shutdown"))
+    Trace.trace("system", "exit") // provides a signal for any connections to be closed.
     this.shouldStop = true
   }
 

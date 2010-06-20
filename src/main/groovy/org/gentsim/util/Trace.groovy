@@ -57,4 +57,12 @@ class Trace {
     }
   }
 
+  /**
+   * Clears out all trace writers and traces.
+   */
+  static clearAll () {
+    traces.clear()
+    traceWriters.clear()
+  }
+
 }

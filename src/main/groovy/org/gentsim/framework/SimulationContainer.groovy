@@ -83,7 +83,7 @@ class SimulationContainer {
 
     File f = new File ("./lib")
     def jarPattern = ~/.*\.jar/
-    if (f.exists()) f.eachFileMatch(jarPattern) {
+    if (cl && f.exists()) f.eachFileMatch(jarPattern) {
       def url = "file://${it.absolutePath}"
       Trace.trace("system", "Adding ${url} to the classpath")
       cl.addURL(new URL(url))
@@ -244,6 +244,15 @@ class SimulationContainer {
     this.removeEntity(entity.id)
   }
 
+
+  /**
+   * Returns the number of entities currently being stored in the container.
+   * @return The number of entities currently being stored in the container.
+   */
+  def getNumberEntities () {
+    this.entitiesById.size()
+  }
+
   /**
    * Adds the service description for creating services.
    * @param sd The service description.
@@ -280,6 +289,13 @@ class SimulationContainer {
     this.serviceDescriptions
   }
 
+
+  /**
+   * Returns the number of services currently contained.
+   */
+  def getNumberServices () {
+    this.serviceDescriptions.size()
+  }
 
   /**
    * Creates a service and stores in the list of services.  

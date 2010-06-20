@@ -71,5 +71,6 @@ class LogicalTime implements Serializable {
     seconds = (seconds - minutes/60) * 3600 
     String.format("%02d:%02d:%05.2f", hours, minutes, seconds)
   }
+
 }
 

@@ -248,6 +248,47 @@ class TestSimulationContainer extends Specification {
       ent2_2.services["service2"] == svc2
   }
 
+  def "Test getting the number of entities"() {
+    setup:
+      SimulationContainer sc = new SimulationContainer()
+      def ed1 = new EntityDescription("entity-1")
+      sc.addEntityDescription(ed1)
+
+    expect:
+      sc.numberEntities == 0
+
+    when:
+      sc.newEntity("entity-1")
+      sc.newEntity("entity-1")
+      def ent = sc.newEntity("entity-1")
+
+    then:
+      sc.numberEntities == 3
+
+    when:
+      sc.removeEntity(ent)
+
+    then:
+      sc.numberEntities == 2
+
+  }
+
+  def "Test getting the number of services" () {
+    setup:
+      SimulationContainer sc = new SimulationContainer()
+
+    expect:
+      sc.numberServices == 0
+
+    when:
+    sc.addServiceDescription(new ServiceDescription("svc-1"))
+    sc.addServiceDescription(new ServiceDescription("svc-2"))
+
+    then:
+      sc.numberServices == 2
+
+  }
+
   def "Test getting all service descriptions" () {
     setup:
       SimulationContainer sc = new SimulationContainer()

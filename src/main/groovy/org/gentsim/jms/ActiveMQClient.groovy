@@ -17,11 +17,33 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
+import javax.jms.Session
+import org.apache.activemq.ActiveMQConnectionFactory
+import javax.jms.Connection
+
 /**
  * Provide basic JMS client capabilities.
  * @author Bill Back
  */
 class ActiveMQClient {
 
-  def 
+  /**
+   * Factory for creating connections.
+   * TODO:  Make the connection configurable.
+   */
+  ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616")
+
+  /** Session to use for creating queues and writing data. */
+  Session session
+
+  /**
+   * Creates a new ActiveMQClient with a connection and session.
+   * TODO:  Does this need to be done for all JMS clients, or can there be one client that makes the connection?
+   */
+  ActiveMQClient() {
+    Connection cnx = connectionFactory.createActiveMQConnection()
+    cnx.start()
+    session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE)
+  }
+  
 }

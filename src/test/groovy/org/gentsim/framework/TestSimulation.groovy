@@ -23,10 +23,14 @@ import org.gentsim.util.Trace
 
 class TestSimulation extends Specification {
 
-  def s = new Simulation()
+  def cleanup() {
+    Trace.clearAll()
+  }
 
   def "Test creating simulation"() {
     setup:
+      def s = new Simulation()
+
 
     expect:
       s.getEventDescription("time-update")
@@ -37,6 +41,7 @@ class TestSimulation extends Specification {
 
   def "Test setting the cycle limit"() {
     setup:
+      def s = new Simulation()
 
     expect:
       s.cycleLength == 0
@@ -49,6 +54,9 @@ class TestSimulation extends Specification {
 
   def "Test running the simulation"() {
     setup:
+
+      def s = new Simulation()
+
       def entd = new EntityDescription("system-msg-handler")
       entd.startupCalled = false
       entd.shutdownCalled = false
@@ -70,6 +78,9 @@ class TestSimulation extends Specification {
 
   def "Test running the simulation for a fixed number of cycles"() {
     setup:
+
+      def s = new Simulation()
+
       def entd = new EntityDescription("system-msg-handler")
       entd.startupCalled = false
       entd.shutdownCalled = false
@@ -90,6 +101,8 @@ class TestSimulation extends Specification {
   def "Test creating entities with init"() {
     setup:
 
+      def s = new Simulation()
+
       def ed1 = new EntityDescription("entity1")
       ed1.initCalled = false
       ed1.method ("init") { initCalled = true }
@@ -104,6 +117,8 @@ class TestSimulation extends Specification {
 
   def "Test creating and destroying entities" () {
     setup:
+
+      def s = new Simulation()
 
       def ed1 = new EntityDescription("entity1")
       ed1.attribute "called", 0
@@ -136,6 +151,7 @@ class TestSimulation extends Specification {
 
   def "Test updating enities and changing state" () {
     setup:
+      def s = new Simulation()
 
       def ed3 = new EntityDescription("entity3")
       ed3.attribute "called", 0
@@ -171,6 +187,8 @@ class TestSimulation extends Specification {
 
   def "Test processing events" () {
     setup:
+      def s = new Simulation()
+
       def ed1 = new EntityDescription("entity1")
       ed1.attribute "called", 0
       ed1.handleEvent("event1") { event -> called += 1 }
@@ -201,6 +219,8 @@ class TestSimulation extends Specification {
 
   def "Test sending events in order"() {
     setup:
+      def s = new Simulation()
+
       def evtd1 = new EventDescription("user1")
       def evtd2 = new EventDescription("user2")
       s.addEventDescription(evtd1)
@@ -213,7 +233,7 @@ class TestSimulation extends Specification {
 
       s.setEventOrder(["user1", "user2"])
 
-      def expectedEventOrder = ["system.control.pause", "system.status.startup", "entity-created", "user1", "user2"]
+      def expectedEventOrder = ["system.control.pause", "system.status.startup", "entity-created", "user1", "user2", "system.status.status"]
 
       def ent = s.newEntity("allhandler")
       s.sendEvent(s.newEvent("user2"))
@@ -246,6 +266,8 @@ class TestSimulation extends Specification {
 
   def "Test using time step"() {
     setup:
+      def s = new Simulation()
+
       s.timeStepped()
 
       def entd = new EntityDescription ("entity")
@@ -287,8 +309,56 @@ class TestSimulation extends Specification {
       Statistics.instance.number_events_sent == 1
   }
 
+  def "Test sending system status" () {
+    setup:
+      Simulation s = new Simulation()
+      Trace.on("debug")
+
+      def entd = new EntityDescription("entity")
+      s.addEntityDescription(entd)
+
+      def statusReceiver = new EntityDescription("status-receiver")
+      statusReceiver.status = null
+      statusReceiver.handleEvent("system.status.status") { evt -> Trace.trace "debug", evt.toString(); status = evt }
+      s.addEntityDescription(statusReceiver)
+
+      def svcd = new ServiceDescription("service")
+      s.addServiceDescription(svcd)
+
+      def srent = s.newEntity("status-receiver")
+
+      s.cycle()
+
+    expect:
+      srent.status.time            == 1
+      srent.status.number_entities == 1
+      srent.status.number_services == 1
+      srent.status.cycle_length    == 0
+      srent.status.timestep        == false
+
+    when:
+      s.newEntity("entity")
+      s.newEntity("entity")
+      s.newEntity("entity")
+
+      s.cycleLength = 10
+      s.timeStepped = true
+
+      s.cycle()
+
+    then:
+      srent.status.time            == 2
+      srent.status.number_entities == 4
+      srent.status.number_services == 1
+      srent.status.cycle_length    == 10
+      srent.status.timestep        == true
+
+  }
+
   def "Test entity state change messages" () {
     setup:
+      def s = new Simulation()
+
       // multiple events to show only one is received.
       def ent1 = new Entity(new EntityDescription("ent1"), 1)
       def entd = new EntityDescription ("entity")

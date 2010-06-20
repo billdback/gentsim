@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -17,23 +17,21 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
-import javax.jms.Session
 import org.gentsim.util.TraceWriter
 
 /**
  * Writes trace messages to JMS.
  * @author Bill Back
  */
-class JMSTraceWriter implements TraceWriter {
-
-  /** Session for talking to ActiveMQ. */
-  Session session
+class JMSTraceWriter extends JMSPublisher implements TraceWriter {
 
   /**
    * Creates a new JMS trace writer.
-   * @param JMSConnection connection to the JMS broker to talk to.
+   * @param url The URL to use to connect to the JMS server.
    */
-  JMSTraceWriter(JMSConnection) {
+  JMSTraceWriter(String url) {
+    // TODO: make this configurable via JNDI or the environment.
+    super(url, JMSConstants.JMSSystemTraceTopic)
   }
 
   /**
@@ -42,6 +40,12 @@ class JMSTraceWriter implements TraceWriter {
    * @param msg The message to write. 
    */
   def trace (String t, String msg) {
-
+    if (msg == "exit") {
+      super.sendTextMessage("exit")
+      close()
+    }
+    else {
+      super.sendTextMessage("[${t}] ${msg}")
+    }
   }
 }
