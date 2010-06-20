@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -17,16 +17,11 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
-import spock.lang.*
+/**
+ * Provide basic JMS client capabilities.
+ * @author Bill Back
+ */
+class ActiveMQClient {
 
-class TestJMSTraceWriter extends Specification {
-
-  def "Test creating JMS trace writer"() {
-    
-  }
-
-  def "Test writing trace message to JMS" () {
-
-  }
+  def 
 }
-
