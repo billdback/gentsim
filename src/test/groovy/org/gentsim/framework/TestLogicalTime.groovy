@@ -19,6 +19,10 @@ package org.gentsim.framework
 
 import spock.lang.*
 
+/**
+ * Tests LogicalTime.
+ * @author Bill Back.
+ */
 class TestLogicalTime  extends Specification {
 
   def "Create logical time" () {

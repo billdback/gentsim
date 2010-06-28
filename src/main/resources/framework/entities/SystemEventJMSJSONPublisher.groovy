@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright © 2010 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -15,24 +15,19 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.framework
+import org.gentsim.framework.EntityDescription
+import org.gentsim.jms.JMSEventPublisher
+import org.gentsim.jms.JMSConstants
+import org.gentsim.serialize.ThingToJSONSerializer
 
-/**
- * This class is used to describe simulation services.  Services are a special case of entities.
- * @author Bill Back
- */
-class ServiceDescription extends EntityDescription {
+ed = new EntityDescription("system.jms.json.publisher")
 
-  /**
-   * Creates a new service that can be instantiated in the simulation.
-   * @param type The unique type of the service.
-   * @param attrs A map of attribute values.
-   * @throws IllegalArgumentException Thrown if the type is invalid.
-   */
-  ServiceDescription (String type, Map attrs = null) throws IllegalArgumentException {
-    super(type, attrs)
+// TODO: Make this configurable.
+ed.parameter "jms_connection", new JMSEventPublisher("tcp://localhost:61616", JMSConstants.JMSSystemStatusTopic, new ThingToJSONSerializer())
+
+ed.handleEvent("system.*") { evt ->
+  jms_connection.publishEvent(evt)
+  if (evt.type == "system.status.shutdown") {
+    jms_connection.connection.close()
   }
-
-
 }
-

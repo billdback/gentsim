@@ -19,6 +19,10 @@ package org.gentsim.framework
 
 import spock.lang.*
 
+/**
+ * Tests the ScriptEngineConnector.
+ * @author Bill Back.
+ */
 class TestScriptEngineConnector extends Specification {
 
   def "Test finding a resource"() {

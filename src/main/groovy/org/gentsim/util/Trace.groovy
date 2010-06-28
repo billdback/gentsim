@@ -20,6 +20,7 @@ package org.gentsim.util
 /**
  * This class will print trace messages to log4j.debug.  Tracing can be turned
  * on an off for various elements as desired by the user.
+ * @author Bill Back
  */
 class Trace {
 

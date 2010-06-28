@@ -165,7 +165,7 @@ class SimulationContainer {
     this.storeEntity(entity)
     Statistics.instance.number_entities_created += 1
 
-    // N*N, but both are proably small N.
+    // N*N, but both are probably small N.
     this.services.keySet().each { svcName ->
       ed.services.each { edSvcName ->
         if (svcName == edSvcName) {

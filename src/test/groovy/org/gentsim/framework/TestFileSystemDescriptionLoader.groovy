@@ -19,8 +19,10 @@ package org.gentsim.framework
 
 import spock.lang.*
 
-import org.gentsim.util.Trace
-
+/**
+ * Tests the FileSystemDescriptionLoader.
+ * @author Bill Back.
+ */
 class TestFileSystemDescriptionLoader extends Specification {
 
   def "Test loading a description from a named file" () {

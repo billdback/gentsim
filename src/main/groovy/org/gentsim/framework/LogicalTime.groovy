@@ -20,6 +20,12 @@ package org.gentsim.framework
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+/**
+ * Logical time provides a general time format for converting from the integer time to a time format.
+ * Currently logical time only support clock time for time of day, it does not support days, months, or years.
+ * TODO: Make this more generic to allow formats to be passed.
+ * @author Bill Back.
+ */
 class LogicalTime implements Serializable {
 
   private static Log log = LogFactory.getLog("org.gentsim.log")

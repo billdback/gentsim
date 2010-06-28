@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -19,6 +19,10 @@ package org.gentsim.util
 
 import spock.lang.*
 
+/**
+ * Tests the Util class.
+ * @author Bill Back
+ */
 class TestUtil extends Specification {
 
   def "Test converting a file to a string"() {

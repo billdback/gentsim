@@ -4,6 +4,10 @@ import org.gentsim.framework.*
 
 import spock.lang.*
 
+/**
+ * Tests the SimulationTestHarness.
+ * @author Bill Back
+ */
 class TestSimulationTestHarness extends Specification {
 
   // assumes this is run from the gentsim home.

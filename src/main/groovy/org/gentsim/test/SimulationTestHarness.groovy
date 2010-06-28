@@ -26,6 +26,7 @@ import org.gentsim.framework.*
  * for a test, then the author will need to manually connect the classes or, ideally, provide mock behavior.
  * Note that this overwrites many of the simulation container methods, so care must be taken to 
  * keep this class coordinated with the SimulationContainer
+ * @author Bill Back
  */
 class SimulationTestHarness extends Simulation {
 

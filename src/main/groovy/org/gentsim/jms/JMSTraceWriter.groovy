@@ -1,5 +1,5 @@
 /*
-Copyright � 2009 William D. Back
+Copyright � 2010 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -30,7 +30,6 @@ class JMSTraceWriter extends JMSPublisher implements TraceWriter {
    * @param url The URL to use to connect to the JMS server.
    */
   JMSTraceWriter(String url) {
-    // TODO: make this configurable via JNDI or the environment.
     super(url, JMSConstants.JMSSystemTraceTopic)
   }
 

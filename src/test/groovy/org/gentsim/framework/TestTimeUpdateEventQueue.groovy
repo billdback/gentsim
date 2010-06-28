@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -19,6 +19,10 @@ package org.gentsim.framework
 
 import spock.lang.*
 
+/**
+ * Tests the TimeUpdateEventQueue.
+ * @author Bill Back.
+ */
 class TestTimeUpdateEventQueue extends Specification {
 
   def "Test adding events exception"() {

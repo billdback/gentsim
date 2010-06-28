@@ -24,6 +24,10 @@ package org.gentsim.tools
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Generates scripts for the various things that can exist in the simulation.
+ * @author Bill Back
+ */
 class GentsimGenerator {
 
   private static Log log = LogFactory.getLog("org.gentsim.log")
@@ -143,7 +147,7 @@ ${vname}.run()
     this.createDirIfNeeded("events")
     this.createDirIfNeeded("services")
 
-    this.copyResource("/log4j.xml")
+    this.copyResource("/log4j.serialize")
   }
 
   /**

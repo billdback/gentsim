@@ -24,6 +24,7 @@ import org.gentsim.util.Statistics
 /**
  * The simulation class is the main driver for the simulation, combining the container with the 
  * execution.
+ * @author Bill Back
  */
 class Simulation extends SimulationContainer {
 
@@ -118,6 +119,7 @@ class Simulation extends SimulationContainer {
   def loadDefaultDescriptions() {
     // Note:  due to a constraint in the JarURLConnection, directories as resources aren't handled.
     //        Each file to be loaded must be listed.
+    // Load system events.
     this.descriptionLoader.loadDescriptionsFromLocations ( [
         "/framework/events/EntityCreatedEvent.groovy",
         "/framework/events/EntityDestroyedEvent.groovy",
@@ -129,6 +131,11 @@ class Simulation extends SimulationContainer {
         "/framework/events/SystemStatusStartup.groovy",
         "/framework/events/SystemStatusStatus.groovy",
         "/framework/events/TimeUpdateEvent.groovy"
+      ], this
+    )
+    // Load system entities
+    this.descriptionLoader.loadDescriptionsFromLocations ( [
+        "/framework/entities/SystemEventJMSJSONPublisher.groovy"
       ], this
     )
   }
@@ -157,7 +164,9 @@ class Simulation extends SimulationContainer {
     Trace.trace("system", "starting the simulation")
     Statistics.instance.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(newEvent("system.status.startup"))
+      def evt = newEvent("system.status.startup")
+      evt.time = this.currentTime
+      sendEventToEntities(evt)
       while (!this.shouldStop) {
         if (paused) Thread.sleep 100
         else cycle()
@@ -173,7 +182,9 @@ class Simulation extends SimulationContainer {
     Trace.trace("system", "starting the simulation for ${nbrCycles} cycles")
     Statistics.instance.start_time = new Date().getTime()
     Thread.start {
-      sendEventToEntities(newEvent("system.status.startup"))
+      def evt = newEvent("system.status.startup")
+      evt.time = this.currentTime
+      sendEventToEntities(evt)
       int cnt = 0
       while (cnt < nbrCycles && !this.shouldStop) {
         if (paused) Thread.sleep 100
@@ -373,7 +384,9 @@ class Simulation extends SimulationContainer {
     Statistics.instance.end_time = new Date().getTime()
     Statistics.instance.elapsed_time = Statistics.instance.end_time - Statistics.instance.start_time
     Statistics.instance.printStatistics()
-    sendEventToEntities(newEvent("system.status.shutdown"))
+    def evt = newEvent("system.status.shutdown")
+    evt.time = this.currentTime
+    sendEventToEntities(evt)
     Trace.trace("system", "exit") // provides a signal for any connections to be closed.
     this.shouldStop = true
   }

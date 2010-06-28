@@ -17,6 +17,12 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
+import org.gentsim.serialize.ThingToStringSerializer
+
+/**
+ * Provides the base definition of a thing in the simulation.
+ * @author Bill Back
+ */
 class Thing implements Serializable {
 
   /** Unique id for the thing. */
@@ -166,39 +172,14 @@ class Thing implements Serializable {
     return null
   }
 
+  private stringSerializer = new ThingToStringSerializer()
 
    /**
     * Returns a readable version of the Thing that shows parameters and attributes.  Useful for trace and log messages.
     * @return A readable version of the Thing that shows parameters and attributes.
    */
   String toString() {
-    def s = "$description.type($id) -"
-
-    // show parameters
-    s += " parameters: ["
-    def first = true
-    parameters.each { name, value ->
-      if (!first) {
-        s += ", "
-      }
-      else first = false
-      s += "${name} : ${value}"
-    }
-    s += "]"
-
-    // show attributes
-    s += " attributes: ["
-    first = true
-    attributes.each { name, value ->
-      if (!first) {
-        s += ", "
-      }
-      else first = false
-      s += "${name} : ${value}"
-    }
-    s += "]"
-
-    s.toString()
+    this.stringSerializer.serializeThing(this)
   }
   
 }

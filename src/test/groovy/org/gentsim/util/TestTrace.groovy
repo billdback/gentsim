@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -20,6 +20,10 @@ package org.gentsim.util
 
 import spock.lang.*
 
+/**
+ * Tests the Trace class.
+ * @author Bill Back
+ */
 class TestTrace extends Specification {
 
   // This is needed because Trace is all static and doesn't get cleared out between tests.

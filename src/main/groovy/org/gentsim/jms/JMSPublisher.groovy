@@ -1,5 +1,5 @@
 /*
-Copyright � 2009 William D. Back
+Copyright � 2010 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -17,10 +17,8 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
-import org.gentsim.jms.JMSConstants
-
-import javax.jms.Session
 import org.apache.activemq.ActiveMQConnectionFactory
+import javax.jms.Session
 import javax.jms.TopicConnection
 import javax.jms.TopicSession
 import javax.jms.Topic
@@ -30,27 +28,27 @@ import javax.jms.JMSException
 
 /**
  * The JMS Publisher provides an easy way to publish to JMS topics.
+ * @author Bill Back
  */
 class JMSPublisher {
   ActiveMQConnectionFactory connectionFactory
   TopicConnection           connection
   TopicSession              session
-  Topic                     traceTopic
+  Topic                     topic
   TopicPublisher            publisher
 
   /**
    * Creates a new publisher and connects to the JMS topic.
    * @param connectionURL The URL for the running JMS instance.
-   * @param topic The topic to connect to.
+   * @param jmstopic The topic to connect to.
    */
-  JMSPublisher(String connectionURL, String topic) {
-    connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616")
+  JMSPublisher(String connectionURL, String jmstopic) {
+    connectionFactory = new ActiveMQConnectionFactory(connectionURL)
     connection = connectionFactory.createTopicConnection()
     session    = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE)
-    traceTopic = session.createTopic(JMSConstants.JMSSystemTraceTopic)
-    publisher  = session.createPublisher(traceTopic)
+    topic      = session.createTopic(jmstopic)
+    publisher  = session.createPublisher(topic)
 
-    println "Starting JMS publisher on topic ${JMSConstants.JMSSystemTraceTopic}"
     connection.start()
   }
 

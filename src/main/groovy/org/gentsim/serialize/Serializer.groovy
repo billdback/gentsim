@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright © 2010 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -15,24 +15,20 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.gentsim.framework
+package org.gentsim.serialize
+
+import org.gentsim.framework.Event
 
 /**
- * This class is used to describe simulation services.  Services are a special case of entities.
+ * Defines the methods for serializing Things.
  * @author Bill Back
  */
-class ServiceDescription extends EntityDescription {
+public interface Serializer {
 
   /**
-   * Creates a new service that can be instantiated in the simulation.
-   * @param type The unique type of the service.
-   * @param attrs A map of attribute values.
-   * @throws IllegalArgumentException Thrown if the type is invalid.
+   * Converts an event to the formatted version.
+   * @param e The event to convert.
+   * @return A string containing the serialized version the event.
    */
-  ServiceDescription (String type, Map attrs = null) throws IllegalArgumentException {
-    super(type, attrs)
-  }
-
-
+  String serializeEvent(Event e);
 }
-

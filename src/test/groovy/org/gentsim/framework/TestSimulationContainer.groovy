@@ -20,6 +20,10 @@ package org.gentsim.framework
 import spock.lang.*
 import org.gentsim.util.Statistics
 
+/**
+ * Tests the SimulationContainer.
+ * @author Bill Back.
+ */
 class TestSimulationContainer extends Specification {
 
   def "Test getting entity descriptions" () {

@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ package org.gentsim.util
 /**
  * Interface for specific tracers of messages.  A tracer is simply something that allows users to trace messages
  * to some output for debugging, etc.
+ * @author Bill Back
  */
 public interface TraceWriter {
 

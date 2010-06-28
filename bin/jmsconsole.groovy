@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back 
+Copyright © 2010 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -15,14 +15,6 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-/* 
- * This script provides commandline utility for creating gentsim 
- * projects and things.
- * Usage: gentsim { document | <thing-type> <names> [<thing-type> <names> ...] }
- *   thing-type is one of [simulation | entity | event | service ]
- *   names is a list of names of the given type to create.
- * NOTE:  gentsim.jar should be in the classpath.
- */
 import org.gentsim.jms.JMSSubscriber
 import org.gentsim.jms.JMSConstants
 
@@ -30,13 +22,20 @@ import javax.jms.Message
 import javax.jms.TextMessage
 import javax.jms.JMSException
 
-class JMSTraceConsole extends JMSSubscriber {
+/**
+ * This script provides commandline utility for writing messages from a JMS topic.
+ * Usage: jmsconsole <topic>
+ *   topic is the JMS topic to connect to.
+ * NOTE:  gentsim.jar should be in the classpath.
+ * @author Bill Back
+ */
+class JMSConsole extends JMSSubscriber {
 
   /**
    * Creates a new console for logging trace messages.
    */
-  JMSTraceConsole() {
-    super("tcp://localhost:61616", JMSConstants.JMSSystemTraceTopic)
+  JMSConsole(String topic) {
+    super("tcp://localhost:61616", topic)
   }
 
   /**
@@ -62,14 +61,17 @@ class JMSTraceConsole extends JMSSubscriber {
    * Shows the usage for this tool.
    */
   static showUsage() {
-    println "Usage: jmstrace"
-    println "\tin the future you will be able to specify JMS parameters"
+    println "Usage: jmsconsole <topic>"
+    println "\ttopic: The JMS topic to read from."
   }
 
   static main (String [] args) {
-
-    println "creating the JMSTrace reader"
-    JMSTraceConsole jmstc = new JMSTraceConsole()
+    if (args.length < 1) {
+      showUsage()
+    }
+    else {
+      JMSConsole jmsc = new JMSConsole(args[0])
+    }
   }
 
 }

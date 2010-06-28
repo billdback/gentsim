@@ -19,6 +19,10 @@ package org.gentsim.framework
 
 import spock.lang.*
 
+/**
+ * Tests Things.
+ * @author Bill Back.
+ */
 class TestThing extends Specification {
   
   def "Test creating base things"() {

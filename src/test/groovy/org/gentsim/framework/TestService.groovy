@@ -19,6 +19,10 @@ package org.gentsim.framework
 
 import spock.lang.*
 
+/**
+ * Tests the Service.
+ * @author Bill Back.
+ */
 class TestService extends Specification {
   
   def "Create a base service"() {

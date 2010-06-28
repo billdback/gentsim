@@ -21,6 +21,10 @@ import spock.lang.*
 import org.gentsim.util.Statistics
 import org.gentsim.util.Trace
 
+/**
+ * Tests the Simulation.
+ * @author Bill Back.
+ */
 class TestSimulation extends Specification {
 
   def cleanup() {

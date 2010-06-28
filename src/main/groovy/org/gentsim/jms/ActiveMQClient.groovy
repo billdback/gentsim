@@ -1,5 +1,5 @@
 /*
-Copyright � 2009 William D. Back
+Copyright � 2010 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -20,6 +20,10 @@ package org.gentsim.util
 
 import spock.lang.*
 
+/**
+ * Tests the Statistics class.
+ * @author Bill Back
+ */
 class TestStatistics extends Specification {
 
   def "Test setting a statistic with a null name" () {

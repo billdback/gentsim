@@ -19,6 +19,7 @@ package org.gentsim.util
 
 /**
  * Basic utilities for use with the simulation.
+ * @author Bill Back
  */
 class Util {
   

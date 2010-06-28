@@ -21,6 +21,7 @@ import org.gentsim.framework.*
 
 /**
  * Creates documentation for entities and events.
+ * @author Bill Back
  */
 class Documentor extends SimulationContainer {
 

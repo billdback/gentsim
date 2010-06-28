@@ -19,6 +19,10 @@ package org.gentsim.framework
 
 import spock.lang.*
 
+/**
+ * Tests the TimeEventQueue
+ * @author Bill Back.
+ */
 class TestTimeEventQueue extends Specification {
 
   def "Test adding entries and getting back in order"() {

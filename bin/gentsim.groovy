@@ -15,16 +15,17 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-/* 
- * This script provides commandline utility for creating gentsim 
+import org.gentsim.tools.*
+
+/**
+ * This script provides commandline utility for creating gentsim
  * projects and things.
  * Usage: gentsim { document | <thing-type> <names> [<thing-type> <names> ...] }
  *   thing-type is one of [simulation | entity | event | service ]
  *   names is a list of names of the given type to create.
  * NOTE:  gentsim.jar should be in the classpath.
+ * @author Bill Back
  */
-import org.gentsim.tools.*
-
 class gentsim {
 
   static showUsage() {

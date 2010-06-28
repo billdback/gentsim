@@ -20,6 +20,7 @@ package org.gentsim.framework
 /**
  * Defines all of the base capabilities of a service.  Services are special entities to
  * the container.
+ * @author Bill Back
  */
 class Service extends Entity implements Serializable {
   
