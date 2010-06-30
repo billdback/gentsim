@@ -20,12 +20,17 @@ package org.gentsim.serialize
 import spock.lang.*
 import org.gentsim.framework.EventDescription
 import org.gentsim.framework.Event
+import org.gentsim.framework.Thing
 
 /**
  * Tests the ThingToStringSerializer.
  * @author Bill Back
  */
 class TestThingToStringSerializer extends Specification {
+
+  def cleanup() {
+    Thing.parameters = [:]
+  }
 
   def "Test serializing an Event with no attributes or parameters"() {
     setup:
@@ -73,7 +78,10 @@ class TestThingToStringSerializer extends Specification {
       EventDescription ed = new EventDescription("jsonevent")
       ed.attr1 = "attribute1"
       ed.attr2 = "attribute2"
-      // NOTE: since parameters are static, the previous ones will be set.
+
+      ed.parameter "param1", "parameter 1"
+      ed.parameter "param2", 2.0
+
       Event evt = new Event(ed, 1)
       evt.time = 12
       String res = tss.serializeEvent(evt)

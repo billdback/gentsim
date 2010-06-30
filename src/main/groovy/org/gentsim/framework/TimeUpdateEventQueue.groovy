@@ -1,5 +1,5 @@
 /*
-Copyright © 2009 William D. Back
+Copyright ï¿½ 2009 William D. Back
 This file is part of gentsim.
 
     gentsim is free software: you can redistribute it and/or modify
@@ -82,7 +82,6 @@ class TimeUpdateEventQueue extends TimeEventQueue {
    */
   def getEventsForTime (int t) {
     this.currentTime = t
-    Trace.trace("debug", "sending time event for ${currentTime}")
     this.timeUpdateEvent.time = currentTime
 
     this.timeUpdateEvent

@@ -18,6 +18,7 @@ This file is part of gentsim.
 package org.gentsim.framework
 
 import groovy.lang.Closure
+import org.gentsim.util.Trace
 
 /**
  * This class is used to describe simulation entities.
@@ -178,10 +179,10 @@ class EntityDescription extends Description implements Serializable {
    */
   def handleEntityStateChanged(String type, List attributeNames, Closure c) {
     def cond = new Condition().match({ evt ->
-                                       evt.attributes.entity_type.matches(type) && 
+                                       evt.attributes.entity_type.matches(type) &&
                                        evt.attributes.changed_attributes.findAll { a -> attributeNames.findAll { av -> a.matches(av) } } != []
                                      })
-    this.handleEvent("entity-state-changed", cond) { evt -> 
+    this.handleEvent("entity-state-changed", cond) { evt ->
       c.delegate = delegate // sets the delegate on the closure to be the same as this delegate.
       c.setResolveStrategy(Closure.DELEGATE_ONLY)
       c(evt.entity) 

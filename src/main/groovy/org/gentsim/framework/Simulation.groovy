@@ -20,6 +20,8 @@ package org.gentsim.framework
 import org.gentsim.util.Trace
 import org.gentsim.util.Log4JTraceWriter
 import org.gentsim.util.Statistics
+import java.beans.PropertyChangeListener
+import java.beans.PropertyChangeEvent
 
 /**
  * The simulation class is the main driver for the simulation, combining the container with the 
@@ -290,7 +292,6 @@ class Simulation extends SimulationContainer {
    * Processes events for the current time, sending to entities and services who requested the event.
    */
   def processCurrentEvents () {
-    // TODO figure out how to aggregate changes to the entity to reduce the number of messages being sent.
     // this could be done by event changes to a map based on the entity and update the changes.  Then
     // at the end of the cycle send the entity changed events.
     //StopWatch watch = new LoggingStopWatch("Simulation.processCurrentEvents")
@@ -322,24 +323,10 @@ class Simulation extends SimulationContainer {
   protected sendEventToEntities (event) {
     Trace.trace("events", "Sending ${event.type} ${event.attributes} to entities at time ${event.time}")
     //StopWatch watch = new LoggingStopWatch("Simulation.sendEventToEntities")
-    def old_attributes = [:]
     this.getEntitiesWhoHandleEvent (event).each { ent ->
-      old_attributes.clear()
-      old_attributes.putAll(ent.attributes)
       ent.handleEvent(event)
       Statistics.instance.number_events_sent += 1
 
-      // see if anything changed.
-      def changed_attr = []
-      old_attributes.each { attr -> // doesn't really handle adding attributes
-        if (old_attributes[attr.key] != ent.attributes[attr.key]) changed_attr << attr.key
-      }
-      if (changed_attr != []) {
-        def escevt = this.newEvent("entity-state-changed",
-          ["entity_type": ent.type, "entity": ent, "changed_attributes": changed_attr])
-        Trace.trace("entities", "${ent.type} changed attributes ${changed_attr}")
-        sendEvent(escevt)
-      }
     }
     //watch.stop()
   }

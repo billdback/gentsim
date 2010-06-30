@@ -155,6 +155,7 @@ class TestSimulation extends Specification {
 
   def "Test updating enities and changing state" () {
     setup:
+Trace.on "debug"
       def s = new Simulation()
 
       def ed3 = new EntityDescription("entity3")
@@ -323,7 +324,7 @@ class TestSimulation extends Specification {
 
       def statusReceiver = new EntityDescription("status-receiver")
       statusReceiver.status = null
-      statusReceiver.handleEvent("system.status.status") { evt -> Trace.trace "debug", evt.toString(); status = evt }
+      statusReceiver.handleEvent("system.status.status") { evt -> status = evt }
       s.addEntityDescription(statusReceiver)
 
       def svcd = new ServiceDescription("service")

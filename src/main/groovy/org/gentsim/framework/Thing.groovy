@@ -17,6 +17,8 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
+import java.beans.*
+
 import org.gentsim.serialize.ThingToStringSerializer
 
 /**
@@ -32,7 +34,7 @@ class Thing implements Serializable {
   final Description description
 
   /** Attribute values for this thing. */
-  final attributes = [:]
+  final attributes = [:] as ObservableMap
 
   /** Parameters for all things. */
   static parameters = [:] // [entityName : parameterName : parameterValue]
@@ -48,6 +50,13 @@ class Thing implements Serializable {
 
     this.description = td
     this.id   = id
+
+    // If this is the first of the type, then create the parameters.
+    def parameterMap = Thing.parameters[this.type]
+    if (parameterMap == null) { // new parameter
+      parameterMap = [:] as ObservableMap
+      Thing.parameters[this.type] = parameterMap
+    }
 
     setAttributes(td)
     setParameters(td)
@@ -145,11 +154,6 @@ class Thing implements Serializable {
    */
   def setParameter (name, value) {
     def parameterMap = Thing.parameters[this.type]
-    if (parameterMap == null) { // new parameter
-      parameterMap = [:]
-      Thing.parameters[this.type] = parameterMap
-    }
-    
     if (value instanceof Closure) {
       value = value()
     }

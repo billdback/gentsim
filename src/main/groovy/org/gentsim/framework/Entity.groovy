@@ -17,10 +17,12 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
+import java.beans.*
+
 class Entity extends Thing {
 
   /** Service instances used by this entity. */
-  final services = [:]
+  final services = [:] as ObservableMap
 
   /**
    * Creates an instance of a base entity.

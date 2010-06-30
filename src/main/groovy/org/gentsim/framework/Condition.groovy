@@ -76,7 +76,6 @@ class Condition implements Serializable {
       value(thing.attributes[name])
     }
     else if (thing.attributes[name] instanceof String) {
-//println "----string match ${thing.attributes[name]}.matches(${value}) == ${thing.attributes[name].matches(value)}"
       thing.attributes[name].matches(value) // support pattern matching on all string attributes.
     }
     else {

@@ -17,6 +17,9 @@ This file is part of gentsim.
 */
 package org.gentsim.framework
 
+import java.beans.PropertyChangeListener
+import java.beans.PropertyChangeEvent
+
 class ContainedEntity extends Entity implements Serializable {
 
   /** The owner of the entity. */
@@ -32,6 +35,20 @@ class ContainedEntity extends Entity implements Serializable {
   ContainedEntity (EntityDescription ed, id, owner, Map attrs = null) {
     super(ed, id, attrs)
     this.owner = owner
+
+    // Sets a link to automatically notify the container when this entity changes.
+    this.attributes.addPropertyChangeListener({ evt -> handleAttributeChange(evt)} as PropertyChangeListener)
+
+  }
+
+
+  /**
+   * Notifies the simulation that an attribute has changed.
+   * @param evt Property change event created when the event changes.
+   */
+  def handleAttributeChange(PropertyChangeEvent evt) {
+    sendEvent(newEvent("entity-state-changed",
+      ["entity_type": this.type, "entity": this, "changed_attributes": [evt.propertyName]]))
   }
 
   /*********** wrapper methods to make life easier **********/
