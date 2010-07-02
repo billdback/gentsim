@@ -43,13 +43,13 @@ class JMSPublisher {
    * @param jmstopic The topic to connect to.
    */
   JMSPublisher(String connectionURL, String jmstopic) {
-    connectionFactory = new ActiveMQConnectionFactory(connectionURL)
-    connection = connectionFactory.createTopicConnection()
-    session    = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE)
-    topic      = session.createTopic(jmstopic)
-    publisher  = session.createPublisher(topic)
+    this.connectionFactory = new ActiveMQConnectionFactory(connectionURL)
+    this.connection = connectionFactory.createTopicConnection()
+    this.session    = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE)
+    this.topic      = session.createTopic(jmstopic)
+    this.publisher  = session.createPublisher(topic)
 
-    connection.start()
+    this.connection.start()
   }
 
   /**

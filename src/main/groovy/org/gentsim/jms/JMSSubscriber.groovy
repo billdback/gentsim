@@ -17,9 +17,6 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
-import org.gentsim.jms.JMSConstants
-
-import javax.jms.Session
 import org.apache.activemq.ActiveMQConnectionFactory
 import javax.jms.TopicConnection
 import javax.jms.TopicSession
@@ -30,12 +27,12 @@ import javax.jms.TopicSubscriber
  * The JMS Subscriber provides an easy mechanism for subscribing to JMS topics.
  * @author Bill Back
  */
-abstract class JMSSubscriber implements javax.jms.MessageListener {
+abstract class JMSSubscriber extends ActiveMQTopicClient implements javax.jms.MessageListener {
 
   ActiveMQConnectionFactory connectionFactory
   TopicConnection           connection
   TopicSession              session
-  Topic                     traceTopic
+  Topic                     topic
   TopicSubscriber           subscriber
 
   /**
@@ -44,14 +41,15 @@ abstract class JMSSubscriber implements javax.jms.MessageListener {
    * @param topic The topic to connect to.
    */
   JMSSubscriber(String connectionURL, String topic) {
-    connectionFactory = new ActiveMQConnectionFactory(connectionURL)
-    connection = connectionFactory.createTopicConnection()
-    session    = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE)
-    traceTopic = session.createTopic(topic)
-    subscriber = session.createSubscriber(traceTopic)
-    subscriber.setMessageListener(this)
+    super(connectionURL, topic)
+    this.connectionFactory = new ActiveMQConnectionFactory(connectionURL)
+    this.connection = connectionFactory.createTopicConnection()
+    this.session    = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE)
+    this.topic = session.createTopic(topic)
+    this.subscriber = session.createSubscriber(this.topic)
+    this.subscriber.setMessageListener(this)
 
-    connection.start()
+    this.connection.start()
   }
 
   /**

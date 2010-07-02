@@ -29,7 +29,8 @@ import org.gentsim.framework.Thing
  */
 class TestThingToJSONSerializer extends Specification {
 
-  def cleanup() {
+  def setup() {
+    // Parameters are static, so they need to be reset between tests.
     Thing.parameters = [:]
   }
 
@@ -42,7 +43,7 @@ class TestThingToJSONSerializer extends Specification {
       String res = tjs.serializeEvent(evt)
 
     expect:
-      res == '{"type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : null, "attributes" : null}'
+      res == '{"simtype" : "event", "type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : null, "attributes" : null}'
   }
 
   def "Test serializing an Event with just attributes"() {
@@ -56,7 +57,7 @@ class TestThingToJSONSerializer extends Specification {
       String res = tjs.serializeEvent(evt)
 
     expect:
-      res == '{"type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : null, "attributes" : {"attr1" : "attribute1", "attr2" : "attribute2"}}'
+      res == '{"simtype" : "event", "type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : null, "attributes" : {"attr1" : "attribute1", "attr2" : "attribute2"}}'
   }
 
   def "Test serializing an Event with just parameters"() {
@@ -70,7 +71,7 @@ class TestThingToJSONSerializer extends Specification {
       String res = tjs.serializeEvent(evt)
 
     expect:
-      res == '{"type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : {"param1" : "parameter 1", "param2" : 2.0}, "attributes" : null}'
+      res == '{"simtype" : "event", "type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : {"param1" : "parameter 1", "param2" : 2.0}, "attributes" : null}'
   }
 
   def "Test serializing an Event with attributes and parameters"() {
@@ -87,7 +88,7 @@ class TestThingToJSONSerializer extends Specification {
       String res = tjs.serializeEvent(evt)
 
     expect:
-      res == '{"type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : {"param1" : "parameter 1", "param2" : 2.0}, "attributes" : {"attr1" : "attribute1", "attr2" : "attribute2"}}'
+      res == '{"simtype" : "event", "type" : "jsonevent" , "id" : 1, "time" : 12, "parameters" : {"param1" : "parameter 1", "param2" : 2.0}, "attributes" : {"attr1" : "attribute1", "attr2" : "attribute2"}}'
   }
 
 }

@@ -28,7 +28,8 @@ import org.gentsim.framework.Thing
  */
 class TestThingToStringSerializer extends Specification {
 
-  def cleanup() {
+  def setup() {
+    // Parameters are static, so they need to be reset between tests.
     Thing.parameters = [:]
   }
 

@@ -32,7 +32,7 @@ class ThingToJSONSerializer implements Serializer {
    * @return A string containing XML for the event.
    */
   String serializeEvent(Event e) {
-    String json = '{"type" : "' + e.type + '" , "id" : ' + e.id + ", "
+    String json = '{"simtype" : "event", "type" : "' + e.type + '" , "id" : ' + e.id + ", "
 
     json += '"time" : ' + e.time + ', '
     json += parametersAsJSON(e) + ", "
