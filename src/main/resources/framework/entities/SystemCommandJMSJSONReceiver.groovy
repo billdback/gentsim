@@ -28,50 +28,8 @@ import org.gentsim.framework.ContainedEntity
 
 ed = new EntityDescription("system.jms.json.commandreceiver")
 
-class JSONSystemCommandReceiver extends JMSReceiver {
-
-  /** Simulation that owns this receiver. */
-  Simulation sim
-
-  ContainedEntity containedEntity
-
-  /**
-   * Creates a new system command receiver.
-   * @param url The URL to JMS.
-   * @param q The queue to connect to.
-   */
-  JSONSystemCommandReceiver(String url, String q, ContainedEntity ce) {
-    super(url, q)
-    this.containedEntity = ce
-  }
-  
-  /** Used to deserialize incoming messages. */
-  JSONToThingDeserializer jtd
-
-  /**
-   * Asynchronously handles messages received from the queue.
-   * @param message The message received from the queue.
-   */
-  void onMessage(Message message) {
-    Trace.trace "jms", "Received JSM command: ${((TextMessage)message).getText()}"
-    def sim = containedEntity.container
-    if (jtd == null) {
-      jtd = new JSONToThingDeserializer(sim)
-    }
-    if (jtd != null) {
-      Event evt = jtd.deserializeEvent(((TextMessage)message).getText())
-      Trace.trace "jms", "New JMS command:  ${evt}"
-      sim.sendEvent(evt)
-    }
-  }
-}
-
+// Note: This must be properly set to a JMSReceiver before JMS messages can be sent.
 ed.parameter "jms_connection", null
-
-ed.oncreate {
-// TODO: Make this configurable.
-  jms_connection = new JSONSystemCommandReceiver("tcp://localhost:61616", JMSConstants.JMSSystemControlQueue, self)
-}
 
 ed.handleEvent("system.status.shutdown") { evt ->
   jms_connection.close()

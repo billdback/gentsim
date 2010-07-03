@@ -22,8 +22,8 @@ import org.gentsim.serialize.ThingToJSONSerializer
 
 ed = new EntityDescription("system.jms.json.publisher")
 
-// TODO: Make this configurable.
-ed.parameter "jms_connection", new JMSEventPublisher("tcp://localhost:61616", JMSConstants.JMSSystemStatusTopic, new ThingToJSONSerializer())
+// Note: This must be properly set to a JMSPublisher before JMS messages can be sent.
+ed.parameter "jms_connection", null
 
 ed.handleEvent("system.*") { evt ->
   jms_connection.publishEvent(evt)

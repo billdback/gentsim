@@ -22,6 +22,11 @@ import org.gentsim.util.Log4JTraceWriter
 import org.gentsim.util.Statistics
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeEvent
+import org.gentsim.jms.JMSTraceWriter
+import org.gentsim.jms.JMSEventPublisher
+import org.gentsim.jms.JMSConstants
+import org.gentsim.serialize.ThingToJSONSerializer
+import org.gentsim.jms.JMSJSONSystemCommandReceiver
 
 /**
  * The simulation class is the main driver for the simulation, combining the container with the 
@@ -118,7 +123,7 @@ class Simulation extends SimulationContainer {
   /**
    * Loads the default descriptions available to simulations.
    */
-  def loadDefaultDescriptions() {
+  private loadDefaultDescriptions() {
     // Note:  due to a constraint in the JarURLConnection, directories as resources aren't handled.
     //        Each file to be loaded must be listed.
     // Load system events.
@@ -141,6 +146,19 @@ class Simulation extends SimulationContainer {
         "/framework/entities/SystemEventJMSJSONPublisher.groovy"
       ], this
     )
+  }
+
+  /**
+   * Sets up the simulation to support the use of JMS.
+   * @param url The URL to the JMS instance to connect to.
+   */
+  def useJMS (String url) {
+    Trace.addTraceWriter(new JMSTraceWriter(url))
+    Trace.on "jms"
+    def pub = newEntity("system.jms.json.publisher")
+    pub.jms_connection = new JMSEventPublisher(url, JMSConstants.JMSSystemStatusTopic, new ThingToJSONSerializer())
+    def recvr = newEntity("system.jms.json.commandreceiver")
+    recvr.jms_connection = new JMSJSONSystemCommandReceiver(url, JMSConstants.JMSSystemControlQueue, this)
   }
 
   /** Adds statistics to the parent class. */
@@ -244,7 +262,6 @@ class Simulation extends SimulationContainer {
    * @return this to allow for method chaining.
    */
   def sendEvent (Event event) {
-
     // entity state change events are buffered to only have one update per cycle.
     if (event.type == "entity-state-changed") {
       bufferEntityChangeEvent(event)
