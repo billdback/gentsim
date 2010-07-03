@@ -29,7 +29,7 @@ public interface JMSConstants {
   static final String JMSPort               = "gentsim.jms.port"
 
   // JMS Topics
-  static final String JMSSystemControlTopic = "gentsim.system.control"
+  static final String JMSSystemControlQueue = "gentsim.system.control"
   static final String JMSSystemStatusTopic  = "gentsim.system.status"
   static final String JMSSystemTraceTopic   = "gentsim.system.trace"
   static final String JMSEventTopic         = "gentsim.events"

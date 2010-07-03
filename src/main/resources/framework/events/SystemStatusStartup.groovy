@@ -18,3 +18,4 @@ This file is part of gentsim.
 import org.gentsim.framework.EventDescription
 
 event = new EventDescription("system.status.startup")
+event.state = "running" // either running or paused

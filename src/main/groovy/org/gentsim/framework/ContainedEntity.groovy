@@ -38,7 +38,6 @@ class ContainedEntity extends Entity implements Serializable {
 
     // Sets a link to automatically notify the container when this entity changes.
     this.attributes.addPropertyChangeListener({ evt -> handleAttributeChange(evt)} as PropertyChangeListener)
-
   }
 
 
@@ -52,6 +51,14 @@ class ContainedEntity extends Entity implements Serializable {
   }
 
   /*********** wrapper methods to make life easier **********/
+
+  /**
+   * Returns the container holding this entity.
+   * @return The container holding this entity.
+   */
+  def getContainer () {
+    owner
+  }
 
   /**
    * Creates a new entity of the given type.

@@ -17,32 +17,35 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
-import javax.jms.TopicSubscriber
+import javax.jms.QueueSender
+import javax.jms.TextMessage
 
 /**
- * The JMS Subscriber provides an easy mechanism for subscribing to JMS topics.
+ * The JMSSender provides support for sending messages to a JMS Queue.
  * @author Bill Back
  */
-abstract class JMSSubscriber extends ActiveMQTopicClient implements javax.jms.MessageListener {
+class JMSSender extends ActiveMQQueueClient {
 
-  /** Subscribes to the topic to receive messages. */
-  TopicSubscriber subscriber
+  /** Sends messages to the queue. */
+  QueueSender sender
 
   /**
-   * Creates a new subscriber and starts the connection to JMS.
+   * Creates a sender to send messages to a JMS queue.
    * @param connectionURL The URL for the running JMS instance.
-   * @param topic The topic to connect to.
+   * @param queue The queue to connect to.
    */
-  JMSSubscriber(String connectionURL, String topic) {
-    super(connectionURL, topic)
-    this.subscriber = session.createSubscriber(this.topic)
-    this.subscriber.setMessageListener(this)
+  JMSSender(String connectionURL, String q) {
+    super(connectionURL, q)
+    this.sender = super.session.createSender(super.queue)
   }
 
   /**
-   * Handles the message from the JMS connection.
-   * @param message The message received from the JMS connection.
+   * Sends the message to the queue.
+   * @param msg The message to send.
    */
-  abstract void onMessage(javax.jms.Message message)
-  
+  void sendTextMessage(String msg) {
+    TextMessage tmsg = super.session.createTextMessage(msg)
+    sender.send(tmsg)
+  }
+
 }

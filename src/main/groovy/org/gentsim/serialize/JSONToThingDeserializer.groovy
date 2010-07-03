@@ -19,9 +19,9 @@ package org.gentsim.serialize
 
 import org.gentsim.framework.Event
 import net.sf.json.groovy.JsonSlurper
-import org.gentsim.framework.Simulation
-import net.sf.json.JSON
 import net.sf.json.JSONObject
+import org.gentsim.framework.SimulationContainer
+import org.gentsim.util.Trace
 
 /**
  * Deserializes from a JSON representation of a thing to the specific thing.
@@ -37,7 +37,7 @@ class JSONToThingDeserializer extends Deserializer {
    * Creates a new deserializer with the simulation to use to create events.
    * @param sim The simulation to use creating events.
    */
-  JSONToThingDeserializer(Simulation sim) {
+  JSONToThingDeserializer(SimulationContainer sim) {
     super.simulation = sim
   }
 
@@ -52,7 +52,7 @@ class JSONToThingDeserializer extends Deserializer {
 
     JSONObject json
     Event evt
-    
+
     try {
       json = slurper.parseText(str)
     }
@@ -61,7 +61,9 @@ class JSONToThingDeserializer extends Deserializer {
     }
 
     // make sure the JSON thing is really an event.
-    if ("event" != json.get("simtype")) throw new DeserializationException("${str} is not a JSON represenation of an event.")
+    if ("event" != json.get("simtype")) {
+      throw new DeserializationException("${json.get("simtype")} is not a JSON represenation of an event.")
+    }
 
     // get the event type.
     String evtType = json.get("type")
@@ -73,11 +75,15 @@ class JSONToThingDeserializer extends Deserializer {
       throw new DeserializationException(e.getMessage())
     }
 
-    JSONObject attributes = json.get("attributes")
-    attributes.keys()?.each { key ->
-      evt.setAttribute(key, attributes.get(key))
+    try {
+      JSONObject attributes = json.get("attributes")
+      attributes.keys()?.each { key ->
+        evt.setAttribute(key, attributes.get(key))
+      }
     }
-
+    catch (Exception e) {
+      // ignore - no attributes
+    }
     return evt;
   }
 }

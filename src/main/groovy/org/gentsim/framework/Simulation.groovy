@@ -137,6 +137,7 @@ class Simulation extends SimulationContainer {
     )
     // Load system entities
     this.descriptionLoader.loadDescriptionsFromLocations ( [
+        "/framework/entities/SystemCommandJMSJSONReceiver.groovy",
         "/framework/entities/SystemEventJMSJSONPublisher.groovy"
       ], this
     )
@@ -158,17 +159,22 @@ class Simulation extends SimulationContainer {
     this.timeStepped = true
     this.systemEventQueues.addEventQueue("time-update", new TimeUpdateEventQueue(newEvent("time-update")))
   }
-  
+
+  def sendStartupEvent () {
+    def evt = newEvent("system.status.startup")
+    evt.state = (this.paused) ? "paused" : "running"
+    evt.time = this.currentTime
+    sendEventToEntities(evt)
+  }
+
   /**
    * Continues to run the simulation until told to stop.
    */
   def run() {
     Trace.trace("system", "starting the simulation")
     Statistics.instance.start_time = new Date().getTime()
+    sendStartupEvent()
     Thread.start {
-      def evt = newEvent("system.status.startup")
-      evt.time = this.currentTime
-      sendEventToEntities(evt)
       while (!this.shouldStop) {
         if (paused) Thread.sleep 100
         else cycle()
@@ -184,9 +190,7 @@ class Simulation extends SimulationContainer {
     Trace.trace("system", "starting the simulation for ${nbrCycles} cycles")
     Statistics.instance.start_time = new Date().getTime()
     Thread.start {
-      def evt = newEvent("system.status.startup")
-      evt.time = this.currentTime
-      sendEventToEntities(evt)
+      sendStartupEvent()
       int cnt = 0
       while (cnt < nbrCycles && !this.shouldStop) {
         if (paused) Thread.sleep 100
@@ -224,6 +228,7 @@ class Simulation extends SimulationContainer {
   def sendSystemStatusEvent() {
 
     def statusEvent = newEvent("system.status.status", [
+            "state"           : this.paused ? "paused" : "running",
             "number_entities" : this.numberEntities,
             "number_services" : this.numberServices,
             "cycle_length"    : this.cycleLength,

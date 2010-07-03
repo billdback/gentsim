@@ -39,6 +39,9 @@ class Thing implements Serializable {
   /** Parameters for all things. */
   static parameters = [:] // [entityName : parameterName : parameterValue]
 
+  /** Allows the thing to reference itself from closures. */
+  Thing self
+
   /**
    * Creates an instance of a thing.
    * @param td The descriptor for the thing.
@@ -62,6 +65,15 @@ class Thing implements Serializable {
     setParameters(td)
 
     if (attrs) setAttributes(attrs)
+
+    this.self = this
+    
+    Closure oncreate = td.oncreate
+    if (oncreate) {
+      oncreate.delegate = this
+      oncreate.setResolveStrategy(Closure.DELEGATE_ONLY)
+      oncreate()
+    }
   }
 
   /**

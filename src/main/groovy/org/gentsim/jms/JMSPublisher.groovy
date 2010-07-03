@@ -17,11 +17,6 @@ This file is part of gentsim.
 */
 package org.gentsim.jms
 
-import org.apache.activemq.ActiveMQConnectionFactory
-import javax.jms.Session
-import javax.jms.TopicConnection
-import javax.jms.TopicSession
-import javax.jms.Topic
 import javax.jms.TopicPublisher
 import javax.jms.TextMessage
 import javax.jms.JMSException
@@ -30,12 +25,8 @@ import javax.jms.JMSException
  * The JMS Publisher provides an easy way to publish to JMS topics.
  * @author Bill Back
  */
-class JMSPublisher {
-  ActiveMQConnectionFactory connectionFactory
-  TopicConnection           connection
-  TopicSession              session
-  Topic                     topic
-  TopicPublisher            publisher
+class JMSPublisher extends ActiveMQTopicClient {
+  TopicPublisher publisher
 
   /**
    * Creates a new publisher and connects to the JMS topic.
@@ -43,20 +34,8 @@ class JMSPublisher {
    * @param jmstopic The topic to connect to.
    */
   JMSPublisher(String connectionURL, String jmstopic) {
-    this.connectionFactory = new ActiveMQConnectionFactory(connectionURL)
-    this.connection = connectionFactory.createTopicConnection()
-    this.session    = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE)
-    this.topic      = session.createTopic(jmstopic)
+    super(connectionURL, jmstopic)
     this.publisher  = session.createPublisher(topic)
-
-    this.connection.start()
-  }
-
-  /**
-   * Performs cleanup and closes connections to JMS.
-   */
-  protected close() {
-    this.connection.close()
   }
 
   /**

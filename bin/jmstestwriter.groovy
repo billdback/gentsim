@@ -25,9 +25,9 @@ import org.gentsim.jms.JMSConstants
  * NOTE:  gentsim.jar should be in the classpath.
  * @author Bill Back
  */
-class JMSTestWriter extends JMSPublisher {
+class JMSTopicTestWriter extends JMSPublisher {
 
-  JMSTestWriter(topic) {
+  JMSTopicTestWriter(topic) {
     super("tcp://localhost:61616", topic)
   }
 
@@ -45,8 +45,8 @@ class JMSTestWriter extends JMSPublisher {
       showUsage()
     }
     else {
-      println "creating the JMSTestWriter"
-      JMSTestWriter jmst = new JMSTestWriter(args[0])
+      println "creating the JMSTopicTestWriter"
+      JMSTopicTestWriter jmst = new JMSTopicTestWriter(args[0])
       (1..5).each { cnt ->
         def msg = "test message ${cnt}"
         println msg
@@ -55,7 +55,7 @@ class JMSTestWriter extends JMSPublisher {
       }
       println "exiting"
       jmst.sendTextMessage("exit")
-      jmst.connection.close()
+      jmst.close()
     }
   }
 

@@ -25,7 +25,8 @@ class Description implements Serializable {
   final String type
   final attributes   = [:]   // name : value
   final parameters   = [:]   // name : value
-  
+  final Closure oncreate   = null
+
   /**
    * Creates a new description that can be instantiated in the simulation.
    * @param type The unique type of the thing.
@@ -38,6 +39,14 @@ class Description implements Serializable {
     }
     this.type = type
     if (attrs != null) this.setAttributes(attrs)
+  }
+
+  /**
+   * Called once the Thing has been created.
+   * @param c The closure to call.
+   */
+  def oncreate (Closure c) {
+    this.oncreate = c
   }
 
   /**

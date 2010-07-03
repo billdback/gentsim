@@ -15,19 +15,9 @@ This file is part of gentsim.
     You should have received a copy of the GNU General Public License
     along with gentsim.  If not, see <http://www.gnu.org/licenses/>.
 */
-import org.gentsim.framework.EntityDescription
-import org.gentsim.jms.JMSEventPublisher
-import org.gentsim.jms.JMSConstants
-import org.gentsim.serialize.ThingToJSONSerializer
-
-ed = new EntityDescription("system.jms.json.publisher")
-
-// TODO: Make this configurable.
-ed.parameter "jms_connection", new JMSEventPublisher("tcp://localhost:61616", JMSConstants.JMSSystemStatusTopic, new ThingToJSONSerializer())
-
-ed.handleEvent("system.*") { evt ->
-  jms_connection.publishEvent(evt)
-  if (evt.type == "system.status.shutdown") {
-    jms_connection.close()
-  }
-}
+/*
+This file contains system commands in JSON format to be used with webapps to control the simulation.
+*/
+var system_start_message     = '{"simtype" : "event", "type" : "system.control.start", "parameters" : null, "attributes" : null}'
+var system_shutdown_message  = '{"simtype" : "event", "type" : "system.control.shutdown", "parameters" : null, "attributes" : null}'
+var system_pause_message     = '{"simtype" : "event", "type" : "system.control.pause", "parameters" : null, "attributes" : null}'

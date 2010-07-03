@@ -29,12 +29,12 @@ import javax.jms.JMSException
  * NOTE:  gentsim.jar should be in the classpath.
  * @author Bill Back
  */
-class JMSConsole extends JMSSubscriber {
+class JMSTopicConsole extends JMSSubscriber {
 
   /**
    * Creates a new console for logging trace messages.
    */
-  JMSConsole(String topic) {
+  JMSTopicConsole(String topic) {
     super("tcp://localhost:61616", topic)
   }
 
@@ -49,7 +49,7 @@ class JMSConsole extends JMSSubscriber {
       println text
       if (text == "exit") {
         println "bye..."
-        connection.close()
+        super.close()
       }
     }
     catch (JMSException jmse) {
@@ -70,7 +70,7 @@ class JMSConsole extends JMSSubscriber {
       showUsage()
     }
     else {
-      JMSConsole jmsc = new JMSConsole(args[0])
+      JMSTopicConsole jmsc = new JMSTopicConsole(args[0])
     }
   }
 

@@ -35,6 +35,19 @@ class TestThing extends Specification {
       bd.type == "type"
   }
 
+  def "Test oncreate"() {
+    setup:
+      def bd = new Description("type")
+      bd.foo = 1
+      bd.oncreate { foo = 2 }
+
+    when:
+      def t1 = new Thing(bd, 1)
+
+    then:
+      t1.foo == 2
+  }
+
   def "Test creating thing with no description"() {
     when:
       new Thing(null, 1)

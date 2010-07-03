@@ -25,15 +25,15 @@ import org.gentsim.util.Trace
  */
 class EntityDescription extends Description implements Serializable {
 
-  final methods                   = [:]   // name : Closure
+  final methods       = [:]   // name : Closure
 
   /*
    * type : the type of event to handle
    * conditions : Condition objects to evaluate against the event
    * Closure : The actual event to call
    */
-  final eventHandlers             = [:]   // type : [[conditions] : Closure]
-  final services                  = []    // type of service
+  final eventHandlers = [:]   // type : [[conditions] : Closure]
+  final services      = []    // type of service
   
   /**
    * Creates a new entity that can be instantiated in the simulation.

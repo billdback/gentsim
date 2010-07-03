@@ -19,6 +19,7 @@ This file is part of gentsim.
 import org.gentsim.framework.EventDescription
 
 event = new EventDescription("system.status.status")
+event.state = "running" // either running or paused
 event.number_entities = 0
 event.number_services = 0
 event.cycle_length = 0
