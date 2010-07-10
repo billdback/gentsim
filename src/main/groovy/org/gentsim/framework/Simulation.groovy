@@ -402,7 +402,6 @@ class Simulation extends SimulationContainer {
     this.getEntitiesWhoHandleEvent (event).each { ent ->
       ent.handleEvent(event)
       Statistics.instance.number_events_sent += 1
-
     }
     //watch.stop()
   }

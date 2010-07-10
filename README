@@ -7,6 +7,6 @@ The Groovy Entity Simulation (gentsim) domain specific language (DSL) and framew
 
 Entity based simulations are a special class of simulation that models individual entities or things. Often these things are able to apply “thinking” or decision making and are then typically called agents. Such simulations are very useful for understanding emergent behavior and for developing simulations that model the independent part of complex social systems. One of the interesting aspects of such simulations is that modeling the individual entities can be fairly straightforward since they can typically be modeled as state machines that interact with other state machines.
 
-The current version of gentsim is a very early version that allows for the construction of simple entity simulations with no order of interactions, no inheritance, etc. Such features and additional tools will be forthcoming in future versions and driven by simulation development. The end goal is to have a robust framework and DSL for entity simulations that allow for much more use of simulation in studying these systems.
+The current version of gentsim is a very early version that allows for the construction of simple entity simulations. Additional tools will be forthcoming in future versions and driven by simulation development. The end goal is to have a robust framework and DSL for entity simulations that allow for much more use of simulation in studying these systems.
 
 Note that gentsim requries the use of Groovy 1.7.0 or later.  It will not work with earlier versions.
