@@ -155,7 +155,6 @@ class TestSimulation extends Specification {
 
   def "Test updating enities and changing state" () {
     setup:
-Trace.on "debug"
       def s = new Simulation()
 
       def ed3 = new EntityDescription("entity3")
@@ -238,7 +237,14 @@ Trace.on "debug"
 
       s.setEventOrder(["user1", "user2"])
 
-      def expectedEventOrder = ["system.control.pause", "system.status.startup", "entity-created", "user1", "user2", "system.status.status"]
+      def expectedEventOrder = [
+              "system.status.status",
+              "system.control.pause",
+              "system.status.startup",
+              "entity-created",
+              "user1",
+              "user2",
+              "system.status.status"]
 
       def ent = s.newEntity("allhandler")
       s.sendEvent(s.newEvent("user2"))
@@ -294,6 +300,55 @@ Trace.on "debug"
       entity.time_update_called < entity.event_called
   }
 
+  def "Test using manual stepping with no number cycles" () {
+    setup:
+    Trace.on "debug"
+      Simulation s = new Simulation()
+      s.manuallyStep()
+
+    when:
+      s.run()
+
+    then:
+      s.awaitingStepCommand
+      s.manualStep
+      s.currentTime == 1
+
+    when:
+      s.awaitingStepCommand = false // should release to cycle.
+      Thread.sleep(1000) // short wait to wake up and cycle.
+
+    then:
+      s.currentTime == 2
+
+    cleanup:
+      s.stop()
+  }
+
+  def "Test using manual stepping with number of cycles" () {
+    setup:
+      Simulation s = new Simulation()
+      s.manuallyStep()
+
+    when:
+      s.run(10)
+
+    then:
+      s.awaitingStepCommand
+      s.manualStep
+      s.currentTime == 1
+
+    when:
+      s.awaitingStepCommand = false // should release to cycle.
+      Thread.sleep(1000) // short wait to wake up and cycle.
+
+    then:
+      s.currentTime == 2
+
+    cleanup:
+      s.stop()
+  }
+
   def "Test statistics" () {
     setup:
       Simulation s = new Simulation()
@@ -335,11 +390,12 @@ Trace.on "debug"
       s.cycle()
 
     expect:
-      srent.status.time            == 1
-      srent.status.number_entities == 1
-      srent.status.number_services == 1
-      srent.status.cycle_length    == 0
-      srent.status.timestep        == false
+      srent.status.time             == 1
+      srent.status.number_entities  == 1
+      srent.status.number_services  == 1
+      srent.status.cycle_length     == 0
+      srent.status.timestep         == false
+      srent.status.manually_stepped == false
 
     when:
       s.newEntity("entity")
@@ -357,7 +413,7 @@ Trace.on "debug"
       srent.status.number_services == 1
       srent.status.cycle_length    == 10
       srent.status.timestep        == true
-
+      srent.status.manually_stepped == false
   }
 
   def "Test entity state change messages" () {

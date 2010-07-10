@@ -56,7 +56,6 @@ class JMSJSONSystemCommandReceiver extends JMSReceiver {
   void onMessage(Message message) {
     Trace.trace "jms", "Received JSM command: ${((TextMessage)message).getText()}"
     Event evt = jtd.deserializeEvent(((TextMessage)message).getText())
-//    Trace.trace "jms", "New JMS command:  ${evt}"
     simulation.sendEvent(evt)
   }
 }

@@ -24,4 +24,5 @@ event.number_entities = 0
 event.number_services = 0
 event.cycle_length = 0
 event.timestep = false
+event.manually_stepped = false
 

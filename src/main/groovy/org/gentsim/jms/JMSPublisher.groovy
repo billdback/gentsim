@@ -48,6 +48,10 @@ class JMSPublisher extends ActiveMQTopicClient {
       message.setText(msg)
       publisher.publish(message)
     }
+    catch (javax.jms.IllegalStateException ise) {
+      // ignore - can happen after shutdown of JMS with messages in queue.
+      // System.err.println ("illegal state sending message: " + msg) 
+    }
     catch (JMSException jmse) {
       jmse.printStackTrace()
     }

@@ -48,7 +48,13 @@ class JMSEventPublisher extends JMSPublisher {
    * @param evt The event to send.
    */
   void publishEvent (Event evt) {
-    sendTextMessage(serializer.serializeEvent(evt))
+    try {
+      sendTextMessage(serializer.serializeEvent(evt))
+    }
+    catch (javax.jms.IllegalStateException ise) {
+      // ignore - happens when closed.
+      // System.err.println("Attempt to send to bad JMS connection:  " + evt.toString())
+    }
   }
 
 }

@@ -59,6 +59,15 @@ class Simulation extends SimulationContainer {
   /** Determines if this is a time stepped simulation or not.  If true it is. */
   private boolean timeStepped = false
 
+  /** flag to tell if this is manually stepped or not. */
+  protected boolean manualStep = false
+
+  /**
+   * Flag used when using manual step to indicate that the simulation is awaiting a step notice.  This is
+   * only used when running with manual stepping.
+   */
+  protected boolean awaitingStepCommand = false
+
   /** Current simulation time. */
   private int currentTime = 1
 
@@ -94,6 +103,8 @@ class Simulation extends SimulationContainer {
    * Performs common actions needed to initialize the simulation.
    */
   private setupSimulation(timeStepped = false) {
+//Trace.on "debug"
+//Trace.trace "debug", "setting up the simulation"
     // TODO:  Make this configurable.
     Trace.addTraceWriter(new Log4JTraceWriter())
     addStatistics()
@@ -133,6 +144,7 @@ class Simulation extends SimulationContainer {
         "/framework/events/EntityStateChangedEvent.groovy",
         "/framework/events/SystemControlShutdown.groovy",
         "/framework/events/SystemControlStart.groovy",
+        "/framework/events/SystemControlStep.groovy",
         "/framework/events/SystemControlPause.groovy",
         "/framework/events/SystemStatusShutdown.groovy",
         "/framework/events/SystemStatusStartup.groovy",
@@ -178,6 +190,22 @@ class Simulation extends SimulationContainer {
     this.systemEventQueues.addEventQueue("time-update", new TimeUpdateEventQueue(newEvent("time-update")))
   }
 
+  /**
+   * Sets the simulation to wait for an external message to perform the next cycle.
+   */
+  def manuallyStep () {
+    this.manualStep = true
+    this.awaitingStepCommand = true
+  }
+
+
+  /**
+   * Caused the simulation to automatically run rather than wait for a manual step.
+   */
+  def autoStep () {
+    this.manualStep = false
+  }
+
   def sendStartupEvent () {
     def evt = newEvent("system.status.startup")
     evt.state = (this.paused) ? "paused" : "running"
@@ -192,10 +220,17 @@ class Simulation extends SimulationContainer {
     Trace.trace("system", "starting the simulation")
     Statistics.instance.start_time = new Date().getTime()
     sendStartupEvent()
+    sendSystemStatusEvent()
     Thread.start {
       while (!this.shouldStop) {
-        if (paused) Thread.sleep 100
-        else cycle()
+        if (paused || (this.manualStep && this.awaitingStepCommand)) Thread.sleep 100
+        else {
+          cycle()
+          if (this.manualStep) {
+            this.awaitingStepCommand = true
+            this.sendSystemStatusEvent()
+          }
+        }
       }
     }
   }
@@ -207,14 +242,21 @@ class Simulation extends SimulationContainer {
   def run(int nbrCycles) {
     Trace.trace("system", "starting the simulation for ${nbrCycles} cycles")
     Statistics.instance.start_time = new Date().getTime()
+    sendStartupEvent()
+    sendSystemStatusEvent()
     Thread.start {
-      sendStartupEvent()
       int cnt = 0
       while (cnt < nbrCycles && !this.shouldStop) {
-        if (paused) Thread.sleep 100
+        if ((this.manualStep && this.awaitingStepCommand) || (this.paused)) {
+          Thread.sleep 100
+        }
         else {
           cycle()
           cnt++
+          if (this.manualStep) {
+            this.awaitingStepCommand = true
+            this.sendSystemStatusEvent()
+          }
         }
       }
       if (!this.shouldStop) stop() // perform any shutdown.
@@ -245,12 +287,17 @@ class Simulation extends SimulationContainer {
    */
   def sendSystemStatusEvent() {
 
+//Trace.trace("debug", "sending system status event")
     def statusEvent = newEvent("system.status.status", [
-            "state"           : this.paused ? "paused" : "running",
+            "state"           : this.paused ? "paused" :
+                                 ((this.manualStep && this.awaitingStepCommand) ?
+                                     "awaiting step" :
+                                     "running"),
             "number_entities" : this.numberEntities,
             "number_services" : this.numberServices,
             "cycle_length"    : this.cycleLength,
-            "timestep"        : this.timeStepped
+            "timestep"        : this.timeStepped,
+            "manually_stepped": this.manualStep
     ])
     statusEvent.time = currentTime
     this.sendEventToEntities(statusEvent)
@@ -276,12 +323,19 @@ class Simulation extends SimulationContainer {
       switch (event.description.type) {
         case "system.control.shutdown":
           stop()
+          sendSystemStatusEvent()
           break
         case "system.control.start":
           this.paused = false
+          sendSystemStatusEvent()
           break
         case "system.control.pause":
           this.paused = true
+          sendSystemStatusEvent()
+          break
+        case "system.control.step":
+          this.awaitingStepCommand = false
+          sendSystemStatusEvent()
           break
       }
     }
@@ -398,6 +452,7 @@ class Simulation extends SimulationContainer {
     sendEventToEntities(evt)
     Trace.trace("system", "exit") // provides a signal for any connections to be closed.
     this.shouldStop = true
+    this.sendSystemStatusEvent()
   }
 
   /**
