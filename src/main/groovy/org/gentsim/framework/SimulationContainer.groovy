@@ -358,7 +358,6 @@ class SimulationContainer {
    */
   def newEvent (type, Map attrs = null) {
     def evt = new Event(this.getEventDescription(type), nextID++, attrs)
-Trace.trace "debug", "adding to number_events_created with current value ${Statistics.instance}"
     Statistics.instance.number_events_created += 1
     evt
   }
