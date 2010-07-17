@@ -185,15 +185,12 @@ class Documentor extends SimulationContainer {
     }
   }
 
-  static main (args) {
-    if (!args) {
-      println "usage:  Documentor <scripts-location>"
-    }
-    else {
-      Documentor doc = new Documentor()
-      println "Creating documentation from ${args[0]}"
-      doc.loadDescriptionsFrom(args[0])
-      doc.generateHTML(args[0])
-    }
+  /**
+   * Loads the descriptions from the given location.
+   * @param loc The location to load from.
+   */
+  protected loadDescriptionsFrom (String loc) {
+    new FileSystemDescriptionLoader().loadDescriptionsFromLocation(loc, this)
   }
+
 }
