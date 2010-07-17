@@ -27,6 +27,7 @@ import org.gentsim.jms.JMSEventPublisher
 import org.gentsim.jms.JMSConstants
 import org.gentsim.serialize.ThingToJSONSerializer
 import org.gentsim.jms.JMSJSONSystemCommandReceiver
+import groovyx.gpars.GParsPool
 
 /**
  * The simulation class is the main driver for the simulation, combining the container with the 
@@ -373,8 +374,10 @@ class Simulation extends SimulationContainer {
     //StopWatch watch = new LoggingStopWatch("Simulation.processCurrentEvents")
 
     def sendEventsFromQueue = { queue ->
-      queue.getEventsForTime(currentTime).each { evt ->
-        sendEventToEntities(evt)
+      GParsPool.withPool {
+        queue.getEventsForTime(currentTime).eachParallel { evt ->
+          sendEventToEntities(evt)
+        }
       }
     }
 
@@ -399,9 +402,11 @@ class Simulation extends SimulationContainer {
   protected sendEventToEntities (event) {
     Trace.trace("events", "Sending ${event.type} ${event.attributes} to entities at time ${event.time}")
     //StopWatch watch = new LoggingStopWatch("Simulation.sendEventToEntities")
-    this.getEntitiesWhoHandleEvent (event).each { ent ->
-      ent.handleEvent(event)
-      Statistics.instance.number_events_sent += 1
+    GParsPool.withPool {
+      this.getEntitiesWhoHandleEvent (event).eachParallel { ent ->
+        ent.handleEvent(event)
+        Statistics.instance.number_events_sent += 1
+      }
     }
     //watch.stop()
   }

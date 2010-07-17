@@ -22,6 +22,11 @@
       <url>http://m2repo.spockframework.org/snapshots</url>
     </repository>
 
+    <repository>
+      <id>gpars</id>
+      <name>GPars Repository</name>
+      <url>http://repository.jboss.org/maven2</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -42,6 +47,12 @@
       <groupId>org.codehaus.gmaven.runtime</groupId>
       <artifactId>gmaven-runtime-1.7</artifactId>
       <version>1.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.gpars</groupId>
+      <artifactId>gpars</artifactId>
+      <version>0.10</version>
     </dependency>
 
     <dependency>
