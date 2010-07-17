@@ -374,10 +374,8 @@ class Simulation extends SimulationContainer {
     //StopWatch watch = new LoggingStopWatch("Simulation.processCurrentEvents")
 
     def sendEventsFromQueue = { queue ->
-      GParsPool.withPool {
-        queue.getEventsForTime(currentTime).eachParallel { evt ->
-          sendEventToEntities(evt)
-        }
+      queue.getEventsForTime(currentTime).each { evt ->
+        sendEventToEntities(evt)
       }
     }
 
@@ -402,6 +400,7 @@ class Simulation extends SimulationContainer {
   protected sendEventToEntities (event) {
     Trace.trace("events", "Sending ${event.type} ${event.attributes} to entities at time ${event.time}")
     //StopWatch watch = new LoggingStopWatch("Simulation.sendEventToEntities")
+    // TODO Look at this a bit more to make sure there aren't concurrency violations.
     GParsPool.withPool {
       this.getEntitiesWhoHandleEvent (event).eachParallel { ent ->
         ent.handleEvent(event)
