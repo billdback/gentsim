@@ -136,7 +136,7 @@ class SimulationTestHarness extends Simulation {
    * @param time The tie to send in the update.
    */
   def sendTimeUpdateTo (entity, time) {
-    def evt = new Event(new EventDescription("time-update"), 1)
+    def evt = new Event(new EventDescription("system.time-update"), 1)
     evt.time = time
     entity.handleEvent(evt)
   }

@@ -188,7 +188,6 @@ class Simulation extends SimulationContainer {
    */
   def timeStepped() {
     this.timeStepped = true
-    this.systemEventQueues.addEventQueue("time-update", new TimeUpdateEventQueue(newEvent("time-update")))
   }
 
   /**
@@ -273,6 +272,9 @@ class Simulation extends SimulationContainer {
     Statistics.instance.number_cycles += 1
 
     Trace.trace "system", "system time: ${this.currentTime}"
+    def tue = newEvent("system.time-update")
+    tue.time = this.currentTime
+    sendEventToEntities(tue)
     processCurrentEvents()
     sendEntityUpdates()
     sendSystemStatusEvent()

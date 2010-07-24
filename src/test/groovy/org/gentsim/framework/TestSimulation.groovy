@@ -37,7 +37,7 @@ class TestSimulation extends Specification {
 
 
     expect:
-      s.getEventDescription("time-update")
+      s.getEventDescription("system.time-update")
       s.getEventDescription("entity-created")
       s.getEventDescription("entity-destroyed")
       s.getEventDescription("entity-state-changed")
@@ -153,7 +153,7 @@ class TestSimulation extends Specification {
       e1.called == 0
   }
 
-  def "Test updating enities and changing state" () {
+  def "Test updating entities and changing state" () {
     setup:
       def s = new Simulation()
 
@@ -239,6 +239,7 @@ class TestSimulation extends Specification {
 
       def expectedEventOrder = [
               "system.status.status",
+              "system.time-update",
               "system.control.pause",
               "system.status.startup",
               "entity-created",
@@ -275,11 +276,9 @@ class TestSimulation extends Specification {
       sim.timeStepped
   }
 
-  def "Test using time step"() {
+  def "Test sending time updates"() {
     setup:
       def s = new Simulation()
-
-      s.timeStepped()
 
       def entd = new EntityDescription ("entity")
       entd.attribute "time_update_called"

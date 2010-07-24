@@ -17,5 +17,5 @@ This file is part of gentsim.
 */
 import org.gentsim.framework.EventDescription
 
-event = new EventDescription("time-update")
+event = new EventDescription("system.time-update")
 // Time is already part of the event.

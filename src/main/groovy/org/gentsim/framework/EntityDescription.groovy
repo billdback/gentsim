@@ -89,8 +89,8 @@ class EntityDescription extends Description implements Serializable {
   }
 
   def handleTimeUpdate (Closure c) {
-    handleEvent ("time-update", c)
-    this.handleEvent("time-update")  { evt -> 
+    handleEvent ("system.time-update", c)
+    this.handleEvent("system.time-update")  { evt -> 
       c.delegate = delegate // sets the delegate on the closure to be the same as this delegate.
       c.setResolveStrategy(Closure.DELEGATE_ONLY)
       c(evt.time) 
